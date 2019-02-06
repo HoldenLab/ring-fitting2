@@ -29,8 +29,8 @@ for jj=1:nFrame
     
     %[fitPar{jj}, fitIm] = fitRing(im, pixSz,psfFWHM,'PlotFit');
     %[fitPar{jj}, fitIm] = fitRing(im, pixSz,psfFWHM,'FitFreePsfWidth');
-    %[fitPar{jj}, fitIm] = fitRing(im, pixSz,psfFWHM);
-    [fitPar{jj}, fitIm] = fitRing(im, pixSz,psfFWHM,'RingRadius-max', 2000);
+    %[fitPar{jj}, fitIm] = fitRing(im, pixSz,psfFWHM,'RingRadius-max', 2000);
+    [fitPar{jj}, fitIm] = fitRing(im, pixSz,psfFWHM);
     rads(jj)= fitPar{jj}(3);
     stdCyto(jj) = fitPar{jj}(8);
     %pause;
