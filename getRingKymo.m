@@ -1,4 +1,4 @@
-function [ringKymograph, circleData] = getRingKymoWide2(ringStack,pixSzNm,lineWidthNm, psfFHWM)
+function [ringKymograph, circleData] = getRingKymoWide(ringStack,pixSzNm,lineWidthNm, psfFWHM)
 %extract circular kymograph, integrating over widthNM annulus thickness
 %use fitting to the ring to find the diameter, should make it more robust eg on small rings
 
@@ -6,9 +6,7 @@ ringStack = double(ringStack);
 ringStack_avg = mean(ringStack,3);
 
 %fit blurred ring to the image
-fixPsfFWHM = true;
-plotOn = true;
-fitPar= fitBlurRingRidge(ringStack_avg,pixSzNm,psfFHWM,fixPsfFWHM,plotOn);
+fitPar = fitRing(ringStack_avg, pixSzNm,psfFWHM,'PlotFit');
 x=fitPar(1);
 y=fitPar(2);
 circ_z=[x,y];
@@ -32,7 +30,6 @@ Pcirc = [circ_z(1)+circ_r*cos(theta(:)), circ_z(2)+circ_r*sin(theta(:)), theta(:
 
 %use this to plot a profile for all frames (lineWidth wide)
 lineWidthPix = lineWidthNm/pixSzNm;
-Options=struct;
 ringProfile=[];
 nFr = size(ringStack,3);
 for ii = 1:nFr

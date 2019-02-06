@@ -141,7 +141,7 @@ if plotOn || (~isempty(DEBUG_RING) && DEBUG_RING==true)
     if ~isempty(DEBUG_RING) && DEBUG_RING==true
         keyboard;
     end
-    pause
+    %pause
 end
 
 

@@ -1,19 +1,16 @@
 
-fname='Denoised-reg-MAX_190128_2_MMStack_Pos0.ome-1_ring9.tif';
+fname='Denoised-ftsz sam1  hilo4593 3pc 1s em150 001.reg-1.tif';
 
 ringStack = double(imreadstack(fname));
 pixSz = 65; % [nm]
-lineWid = 10;
-psfFWHM = 300; % [nm]Should be more like 300
-nFrame=size(imS,3);
-fRate=2;
+lineWidthNm = pixSz;
+psfFWHM = 300; % [nm]
 
-%option to fix the radius
-fixPosRad=false;
-pos=[];
-rad=[];
-plotOn=true;
-%plotOn=false
-fixPsfFWHM=true;
 
-[ringKymograph, circleData] = getRingKymo(ringStack,pixSzNm,lineWidthNm, psfFHWM)
+[ringKymograph, circleData] = getRingKymo(ringStack,pixSz,lineWidthNm, psfFWHM)
+%nFrame=size(ringStack,3);
+%fRate=2;
+figure;
+imagesc(ringKymograph)
+axis equal;
+colormap gray
