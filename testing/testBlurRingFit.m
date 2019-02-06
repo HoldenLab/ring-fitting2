@@ -10,16 +10,15 @@ fname='Denoised-reg-MAX_190128_2_MMStack_Pos0.ome-1_ring9.tif';
 imS = double(imreadstack(fname));
 pixSz = 65; % [nm]
 lineWid = 10;
-psfFWHM = 300; % [nm]Should be more like 300
+psfFWHM = 300; % [nm]Check with beads
 nFrame=size(imS,3);
 fRate=2;
 
 %option to fix the radius
-fixPosRad=false;
 pos=[];
 rad=[];
 plotOn=true;
-%plotOn=false;
+%plotOn=false
 fixPsfFWHM=true;
 
 figure;
@@ -28,7 +27,10 @@ for jj=1:nFrame
     jj
     
     
-    [fitPar{jj}, fitIm] = fitRing(im, pixSz,psfFWHM, fixPsfFWHM,  plotOn, fixPosRad, pos, rad);
+    %[fitPar{jj}, fitIm] = fitRing(im, pixSz,psfFWHM,'PlotFit');
+    %[fitPar{jj}, fitIm] = fitRing(im, pixSz,psfFWHM,'FitFreePsfWidth');
+    %[fitPar{jj}, fitIm] = fitRing(im, pixSz,psfFWHM);
+    [fitPar{jj}, fitIm] = fitRing(im, pixSz,psfFWHM,'RingRadius-max', 2000);
     rads(jj)= fitPar{jj}(3);
     stdCyto(jj) = fitPar{jj}(8);
     %pause;
