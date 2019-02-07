@@ -2,6 +2,8 @@ function batchAnalyseRing(fileFilter,pixSz,varargin)
 % function batchAnalyseRing(fileFilter,pixSz,kymoWidth,kymoBgFramespan,bleachPlotOn)
 f = dir(fileFilter);
 nF= numel(f);
+
+hF= figure;
 for ii = 1:nF
     fname = f(ii).name;
     fname
@@ -11,6 +13,7 @@ for ii = 1:nF
         display(getReport(ME));
     end
 end
+close(hF);
 %--------------------------------------------------------
 function [kymoRaw, kymoCorr] = ringCorrectAndFit(fname,pixSz,varargin)
 %,lineProfileWidth,bleachPlotOn,,useTLFitter,frStep,doBGFG_separation)
@@ -56,14 +59,6 @@ while ii<=numel(varargin)
     end
 end
 
-%if ~exist('bleachPlotOn','var')
-%    bleachPlotOn=false;
-%end
-%if ~exist('useTLFitter','var')
-%    useTLFitter=false;
-%    frStep=[];
-%end
-
 [pathstr,name,ext]=fileparts(fname);
 if isempty(pathstr)
     pathstr='.';%matlab looks on all pths not just current path if dont do this
@@ -81,11 +76,6 @@ end
 
 ringStack = imreadstack(fname);
 
-[ringStackCorr,  ringStackData_bgSubOnly, tau_fg, tau_bg,baseLineBG] = otsuBleachCorrect(ringStack,bleachPlotOn);
-bleachFit.tau_fg= tau_fg;
-bleachFit.tau_bg= tau_bg;
-bleachFit.baseLineBG= baseLineBG;
-
 % calculate the kymograph
 if useTLFitter
     %[kymoRaw,circFitRaw,kymoInfoRaw] = getRingKymoTringStackeLapse(ringStack,pixSz,lineProfileWidth,psfFWHM,frStep);
@@ -96,18 +86,16 @@ if useTLFitter
     %radius_fname = [savepath,filesep,fname(1:end-4),'_diamInfo','.txt'];
     %dlmwrite(radius_fname,diamNm);
 else
-    [kymoRaw] = getRingKymo(ringStack,pixSz,lineProfileWidth,psfFWHM,ringFitArg{:});
-    [kymoCorr circFit] = getRingKymo(ringStackCorr,pixSz,lineProfileWidth,psfFWHM,ringFitArg{:});
-    save([savepath,filesep,fname(1:end-4),'_fitData.mat'],'bleachFit','circFit');
+    [kymoRaw,circFit] = getRingKymo(ringStack,pixSz,lineProfileWidth,psfFWHM,ringFitArg{:});
+    save([savepath,filesep,fname(1:end-4),'_fitData.mat'],'circFit');
     %write a blank text file with the radius for quick reference
     f = fopen([savepath,filesep,fname(1:end-4),'_diam',num2str(round(2*circFit.r*pixSz)),'.txt'],'w');
     fclose(f);
 end
 
-%figure;
 hFig =gcf;
 hold off;
-imagesc(ringStackCorr(:,:,1))
+imagesc(ringStack(:,:,1))
 hold all;
 if ~useTLFitter
     scatter(circFit.coord(:,1),circFit.coord(:,2),circFit.coord(:,4)+1);
@@ -124,11 +112,7 @@ saveas(hFig, [savepath,filesep,fname(1:end-4),'_circFit.png']);
 
 %make 2pi versions of everything for convenience
 kymoRaw_wrap = repmat(kymoRaw,[1,2]);
-kymoCorr_wrap = repmat(kymoCorr,[1,2]);
 
 %save everything as floats if that's what's returned
-tiffwrite([savepath,filesep,fname(1:end-4),'_bleachCor.tif'],ringStackCorr);
 tiffwrite([savepath,filesep,fname(1:end-4),'_kymoRaw.tif'],kymoRaw);
 tiffwrite([savepath,filesep,fname(1:end-4),'_kymoRaw_wrap.tif'],kymoRaw_wrap);
-tiffwrite([savepath,filesep,fname(1:end-4),'_kymoCorr.tif'],kymoCorr);
-tiffwrite([savepath,filesep,fname(1:end-4),'_kymoCorr_wrap.tif'],kymoCorr_wrap);
