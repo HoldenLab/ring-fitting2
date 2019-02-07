@@ -15,4 +15,5 @@ psfFWHM = 300; % [nm]
 %axis equal;
 %colormap gray
 %
-[kymoRaw, kymoCorr] = ringCorrectAndFit(fname,pixSz);
+%[kymoRaw, kymoCorr] = ringCorrectAndFit(fname,pixSz);
+batchAnalyseRing(fname,pixSz)
