@@ -5,8 +5,9 @@ ringStack = double(imreadstack(fname));
 pixSz = 65; % [nm]
 lineWidthNm = pixSz;
 psfFWHM = 300; % [nm]
-nFrameStep=1
+nFrameStep=10
 
 %[ringKymograph, circleData] = getRingKymo(ringStack,pixSz,lineWidthNm, psfFWHM)
-[ringKymograph, circleData, kymoInfo] = getRingKymoTimeLapse(ringStack,pixSz,lineWidthNm, psfFWHM,nFrameStep);
-figure;imagesc(ringKymograph);axis equal;colormap gray
+%[ringKymograph, circleData, kymoInfo] = getRingKymoTimeLapse(ringStack,pixSz,lineWidthNm, psfFWHM,nFrameStep);
+%figure;imagesc(ringKymograph);axis equal;colormap gray
+batchAnalyseRing(fname,pixSz,'TimeLapseFitter',nFrameStep)

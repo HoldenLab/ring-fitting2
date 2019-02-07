@@ -15,7 +15,7 @@ for ii = 1:nF
 end
 close(hF);
 %--------------------------------------------------------
-function [kymoRaw, kymoCorr] = ringCorrectAndFit(fname,pixSz,varargin)
+function [kymo, kymoCorr] = ringCorrectAndFit(fname,pixSz,varargin)
 %,lineProfileWidth,bleachPlotOn,,useTLFitter,frStep,doBGFG_separation)
 global DEBUG_RING
 
@@ -25,6 +25,7 @@ frStep = 1;
 lineProfileWidth = 65;
 psfFWHM = 300;
 bleachPlotOn=false;
+nKymoWrap=2;
 nargin = numel(varargin);
 
 ii = 1;
@@ -50,10 +51,13 @@ while ii<=numel(varargin)
         ii=ii+2;
     elseif strcmp(varargin{ii},'PsfFWHM')
         psfFWHM=varargin{ii+1};
-        ii=ii+1;
+        ii=ii+2;
     elseif strcmp(varargin{ii},'LineProfleWidth')
         lineProfileWidth=varargin{ii+1};
-        ii=ii+1;
+        ii=ii+2;
+    elseif strcmp(varargin{ii},'NumKymoRepeats')
+        nKymoWrap=varargin{ii+1};
+        ii=ii+2;
     else
         ii=ii+1;
     end
@@ -78,21 +82,19 @@ ringStack = imreadstack(fname);
 
 % calculate the kymograph
 if useTLFitter
-    %[kymoRaw,circFitRaw,kymoInfoRaw] = getRingKymoTringStackeLapse(ringStack,pixSz,lineProfileWidth,psfFWHM,frStep);
-    %[kymoCorr, circFitCorr, kymoInfoCorr] = getRingKymoTringStackeLapse(ringStackCorr,pixSz,lineProfileWidth,psfFWHM,frStep);
-    %save([savepath,filesep,fname(1:end-4),'_fitData.mat'],'bleachFit','circFitCorr','circFitRaw','kymoInfoRaw','kymoInfoCorr');
-    %%write a blank text file with the radius for quick reference
-    %diamNm = round(kymoInfoCorr(:,3))*2;
-    %radius_fname = [savepath,filesep,fname(1:end-4),'_diamInfo','.txt'];
-    %dlmwrite(radius_fname,diamNm);
+    [kymo,circFit,kymoInfo] = getRingKymoTimeLapse(ringStack,pixSz,lineProfileWidth,psfFWHM,frStep,ringFitArg{:});
+    save([savepath,filesep,fname(1:end-4),'_fitData.mat'],'circFit','kymoInfo');
+    %write a text file with the radius for quick reference
+    diamNm = round(kymoInfo(:,3))*2;
+    radius_fname = [savepath,filesep,fname(1:end-4),'_diamInfo','.txt'];
+    dlmwrite(radius_fname,diamNm);
 else
-    [kymoRaw,circFit] = getRingKymo(ringStack,pixSz,lineProfileWidth,psfFWHM,ringFitArg{:});
+    [kymo,circFit] = getRingKymo(ringStack,pixSz,lineProfileWidth,psfFWHM,ringFitArg{:});
     save([savepath,filesep,fname(1:end-4),'_fitData.mat'],'circFit');
     %write a blank text file with the radius for quick reference
     f = fopen([savepath,filesep,fname(1:end-4),'_diam',num2str(round(2*circFit.r*pixSz)),'.txt'],'w');
     fclose(f);
 end
-
 hFig =gcf;
 hold off;
 imagesc(ringStack(:,:,1))
@@ -100,9 +102,8 @@ hold all;
 if ~useTLFitter
     scatter(circFit.coord(:,1),circFit.coord(:,2),circFit.coord(:,4)+1);
 else
-    for ii = 1:numel(circFitCorr);
-        circFit = circFitCorr{ii};
-        scatter(circFit.coord(:,1),circFit.coord(:,2),circFit.coord(:,4)+1);
+    for ii = 1:numel(circFit);
+        scatter(circFit{ii}.coord(:,1),circFit{ii}.coord(:,2),circFit{ii}.coord(:,4)+1);
     end
 end
 axis equal;
@@ -111,8 +112,8 @@ saveas(hFig, [savepath,filesep,fname(1:end-4),'_circFit.png']);
 
 
 %make 2pi versions of everything for convenience
-kymoRaw_wrap = repmat(kymoRaw,[1,2]);
+kymo_wrap = repmat(kymo,[1,nKymoWrap]);
 
 %save everything as floats if that's what's returned
-tiffwrite([savepath,filesep,fname(1:end-4),'_kymoRaw.tif'],kymoRaw);
-tiffwrite([savepath,filesep,fname(1:end-4),'_kymoRaw_wrap.tif'],kymoRaw_wrap);
+tiffwrite([savepath,filesep,fname(1:end-4),'_kymo.tif'],kymo);
+tiffwrite([savepath,filesep,fname(1:end-4),'_kymoWrap.tif'],kymo_wrap);
