@@ -1,4 +1,4 @@
-function [ringKymograph, circleData] = getRingKymoWide(ringStack,pixSzNm,lineWidthNm, psfFWHM)
+function [ringKymograph, circleData] = getRingKymo(ringStack,pixSzNm,lineWidthNm, psfFWHM,varargin)
 %extract circular kymograph, integrating over widthNM annulus thickness
 %use fitting to the ring to find the diameter, should make it more robust eg on small rings
 
@@ -6,7 +6,7 @@ ringStack = double(ringStack);
 ringStack_avg = mean(ringStack,3);
 
 %fit blurred ring to the image
-fitPar = fitRing(ringStack_avg, pixSzNm,psfFWHM,'PlotFit');
+fitPar = fitRing(ringStack_avg, pixSzNm,psfFWHM,'PlotFit', varargin{:});
 x=fitPar(1);
 y=fitPar(2);
 circ_z=[x,y];

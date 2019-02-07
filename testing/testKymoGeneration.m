@@ -7,10 +7,12 @@ lineWidthNm = pixSz;
 psfFWHM = 300; % [nm]
 
 
-[ringKymograph, circleData] = getRingKymo(ringStack,pixSz,lineWidthNm, psfFWHM)
-%nFrame=size(ringStack,3);
-%fRate=2;
-figure;
-imagesc(ringKymograph)
-axis equal;
-colormap gray
+%[ringKymograph, circleData] = getRingKymo(ringStack,pixSz,lineWidthNm, psfFWHM)
+%%nFrame=size(ringStack,3);
+%%fRate=2;
+%figure;
+%imagesc(ringKymograph)
+%axis equal;
+%colormap gray
+%
+[kymoRaw, kymoCorr] = ringCorrectAndFit(fname,pixSz);
