@@ -6,27 +6,24 @@ ringStack = double(ringStack);
 
 nFr = size(ringStack,3);
 
-frRange = 1:nFrameStep:nFr;
-if  frRange(end)<nFr
-    frRange = [frRange,nFr];%make sure the entire range is covered
+frStart= 1:nFrameStep:nFr;
+nKymoBlock = numel(frStart);
+frEnd   = frStart+nFrameStep-1;
+if frEnd(end)>nFr
+    frEnd(end)=nFr;
 end
-
-nKymoBlock = numel(frRange)-1;
+keyboard
 for ii = 1:nKymoBlock
-    ii
-    frStart = frRange(ii);
-    frEnd   = frRange(ii+1);
-    ringSubset = ringStack(:,:,frStart:frEnd);
+    display(['Frame: ',num2str(frStart(ii))]);
+    ringSubset = ringStack(:,:,frStart(ii):frEnd(ii));
     [ringKymoCell{ii}, circleData{ii}] = getRingKymo(ringSubset,pixSzNm,lineWidthNm, psfFHWM,varargin{:});
     kymoSz(ii,:) = size(ringKymoCell{ii});
     rNm=circleData{ii}.r*pixSzNm;
-    kymoInfo(ii,:) = [frStart,frEnd,rNm,kymoSz(ii,1),kymoSz(ii,2)];
+    kymoInfo(ii,:) = [frStart(ii),frEnd(ii),rNm,kymoSz(ii,1),kymoSz(ii,2)];
 end
 
 maxKymoWidth = max(kymoSz(:,2));
 ringKymograph = zeros(nFr,maxKymoWidth);
 for ii = 1:nKymoBlock
-    frStart = frRange(ii);
-    frEnd   = frRange(ii+1);
-    ringKymograph(frStart:frEnd,1:kymoSz(ii,2))=ringKymoCell{ii};
+    ringKymograph(frStart(ii):frEnd(ii),1:kymoSz(ii,2))=ringKymoCell{ii};
 end

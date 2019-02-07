@@ -5,7 +5,7 @@ ringStack = double(imreadstack(fname));
 pixSz = 65; % [nm]
 lineWidthNm = pixSz;
 psfFWHM = 300; % [nm]
-nFrameStep=10
+nFrameStep=1
 
 %[ringKymograph, circleData] = getRingKymo(ringStack,pixSz,lineWidthNm, psfFWHM)
 %[ringKymograph, circleData, kymoInfo] = getRingKymoTimeLapse(ringStack,pixSz,lineWidthNm, psfFWHM,nFrameStep);
