@@ -1,7 +1,7 @@
 function [fitPar, fitIm] = fitRing_sectored(im, pixSz_nm,psfFWHM, varargin)
 global DEBUG_RING
-%parameters: x0, y0, r,width, Amplitude, BG, innerBG
-NSECTOR=6;
+%parameters: x0, y0, r,width, Amplitude, BG, cytoplasmBg
+NSECTOR=12;
 
 fixPsfFWHM=true;
 plotOn=false;
@@ -75,11 +75,11 @@ width0 = psfFWHM/2.35/pixSz_nm;
 r0 = min(radGuess(fg),radMax);
 amplitude0 = max(fg(:));
 bg0=mean(im(otsuThresh==1));
-innerBG0 = 0;
+cytoplasmBg0 = 0;
 sectorAmp0(1:NSECTOR) = 1;
 
 
-initGuess = [x0,y0,r0,width0,amplitude0,bg0,innerBG0,cytoBgWidth,sectorAmp0];
+initGuess = [x0,y0,r0,width0,amplitude0,bg0,cytoplasmBg0,cytoBgWidth,sectorAmp0];
 
 if ~fixPsfFWHM
     lb =[-inf, -inf,0,0,0,0,0,cytoBgWidthMin,0.*sectorAmp0];
@@ -123,14 +123,14 @@ ringPar(7) = 0;
 ringPar(6)=0;
 ringIm = ringAndGaussBG_sectored(ringPar,imSz,NSECTOR);
 
-%REFIT THE BG
-fitBg_im = im - ringIm;
-initGuessBg= bgPar;
-lbBg =[fitPar(1),fitPar(2),fitPar(3),fitPar(4),0,0,0,cytoBgWidthMin,0.*sectorAmp0];
-ubBg = [fitPar(1),fitPar(2),fitPar(3),fitPar(4),0,inf,inf,cytoBgWidthMax,0.*sectorAmp0];
-[fitParBg] = lsqcurvefit(@(x, xdata)  ringAndGaussBG_sectored(x, xdata,NSECTOR), ...
-                         initGuessBg ,imSz,fitBg_im, lbBg,ubBg,opt); % added resnorm 190114 kw
-bgIm2 =  ringAndGaussBG_sectored(fitParBg,imSz,NSECTOR);
+%%REFIT THE BG
+%fitBg_im = im - ringIm;
+%initGuessBg= bgPar;
+%lbBg =[fitPar(1),fitPar(2),fitPar(3),fitPar(4),0,0,0,cytoBgWidthMin,0.*sectorAmp0];
+%ubBg = [fitPar(1),fitPar(2),fitPar(3),fitPar(4),0,inf,inf,cytoBgWidthMax,0.*sectorAmp0];
+%[fitParBg] = lsqcurvefit(@(x, xdata)  ringAndGaussBG_sectored(x, xdata,NSECTOR), ...
+%                         initGuessBg ,imSz,fitBg_im, lbBg,ubBg,opt); % added resnorm 190114 kw
+%bgIm2 =  ringAndGaussBG_sectored(fitParBg,imSz,NSECTOR);
 
 if plotOn || (~isempty(DEBUG_RING) && DEBUG_RING==true)
     figure;
@@ -182,15 +182,15 @@ if plotOn || (~isempty(DEBUG_RING) && DEBUG_RING==true)
     colormap gray;
     axis equal;
     
-    figure;
-    imagesc(fitBg_im)
-    axis equal
-    figure
-    imagesc(fitBg_im-bgIm2);
-    axis equal
-    figure
-    imagesc(im-bgIm2);
-    axis equal
+    %figure;
+    %imagesc(fitBg_im)
+    %axis equal
+    %figure
+    %imagesc(fitBg_im-bgIm2);
+    %axis equal
+    %figure
+    %imagesc(im-bgIm2);
+    %axis equal
 
     if ~isempty(DEBUG_RING) && DEBUG_RING==true
         keyboard;
@@ -219,7 +219,7 @@ y0 = sum(vy.*y)/sum(vy);
 % %----------------
 % function Fout = blurredRingCrop(par,imSz,otsuThresh)
 % 
-% %parameters: x0, y0, r,width, Amplitude, BG, innerBG
+% %parameters: x0, y0, r,width, Amplitude, BG, cytoplasmBg
 % F = blurredRing(par,imSz);
 % Fout = F(otsuThresh==2);
 
