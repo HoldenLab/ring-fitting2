@@ -1,4 +1,4 @@
-function [fitPar, fitIm] = fitRing_sectored(im, pixSz_nm,psfFWHM, varargin)
+function [fitPar, fitIm,ringIm_noBg] = fitRing_sectored(im, pixSz_nm,psfFWHM, varargin)
 global DEBUG_RING
 %parameters: x0, y0, r,width, Amplitude, BG, cytoplasmBg
 NSECTOR=12;
@@ -8,7 +8,7 @@ cytoBgFWHM_nm = 1300;
 cytoBgFWHMmin_nm = 1000;
 cytoBgFWHMmax_nm = 2000;
 radMax_nm=600;
-psfWidthExtraNm= 50;%as in +/- psfFWHM
+psfWidthExtraNm= 0;%as in +/- psfFWHM
 nargin = numel(varargin);
 ii = 1;
 while ii<=numel(varargin)
@@ -103,10 +103,11 @@ fitIm = ringAndGaussBG_sectored(fitPar,imSz,NSECTOR);
 bgPar = fitPar;
 bgPar(5) = 0; %set the ring amp to 0
 bgIm = ringAndGaussBG_sectored(bgPar,imSz,NSECTOR);
-ringPar = fitPar;
-ringPar(7) = 0;
-ringPar(6)=0;
-ringIm = ringAndGaussBG_sectored(ringPar,imSz,NSECTOR);
+ringIm_noBg = im - bgIm;
+%ringPar = fitPar;
+%ringPar(7) = 0;
+%ringPar(6)=0;
+%ringIm = ringAndGaussBG_sectored(ringPar,imSz,NSECTOR);
 
 
 if plotOn || (~isempty(DEBUG_RING) && DEBUG_RING==true)
