@@ -103,13 +103,16 @@ opt = optimoptions(@lsqcurvefit,'Display','off');
 [fitPar, ~, resid] = lsqcurvefit(@(x, xdata)  ringAndGaussBG(x, xdata), ...
                          initGuess ,imSz,im, lb,ub,opt); % added resnorm 190114 kw
 fitIm = ringAndGaussBG(fitPar,imSz);
-
+bgPar = fitPar;
+bgPar(5) = 0; %set the ring amp to 0
+bgIm = ringAndGaussBG(bgPar,imSz);
 
 ressum = sum(resid.^2);
 
 if plotOn || (~isempty(DEBUG_RING) && DEBUG_RING==true)
 
-    subplot(1,2,1);
+    subplot(2,2,1);
+    title('raw');
     x = fitPar(1);
     y = fitPar(2);
     r = fitPar(3);
@@ -119,6 +122,7 @@ if plotOn || (~isempty(DEBUG_RING) && DEBUG_RING==true)
     hold off;
     %imagesc(fg);
     imagesc(im);
+    colormap gray;
     hold all;
     %fit
     th = 0:pi/50:2*pi;
@@ -135,9 +139,25 @@ if plotOn || (~isempty(DEBUG_RING) && DEBUG_RING==true)
     %figure;
     %imagesc(fitIm);
     %axis equal;
-    subplot(1,2,2);
+
+    subplot(2,2,2);
+    title('fitted image');
     imagesc(fitIm);
+    colormap gray;
     axis equal;
+
+    subplot(2,2,3);
+    title('difference');
+    imagesc(im-fitIm);
+    colormap gray;
+    axis equal;
+
+    subplot(2,2,4);
+    title('bg sub');
+    imagesc(im-bgIm);
+    colormap gray;
+    axis equal;
+    
     if ~isempty(DEBUG_RING) && DEBUG_RING==true
         keyboard;
     end
