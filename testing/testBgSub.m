@@ -26,7 +26,7 @@ im=imS(:,:,jj);
 %[fitPar{jj}, fitIm] = fitRing_robust(im, pixSz,psfFWHM);
 %rads(jj)= fitPar{jj}(3);
 %stdCyto(jj) = fitPar{jj}(8);
-[fitPar{jj}, fitIm] = fitRing_sectored(im, pixSz,psfFWHM);
+[fitPar{jj}, fitIm] = fitRing_sectored(im, pixSz,psfFWHM,'PsfWidthRangeNm',1000);
 rads(jj)= fitPar{jj}(3);
 stdCyto(jj) = fitPar{jj}(8);
 

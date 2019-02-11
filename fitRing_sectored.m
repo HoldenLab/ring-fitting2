@@ -3,18 +3,18 @@ global DEBUG_RING
 %parameters: x0, y0, r,width, Amplitude, BG, cytoplasmBg
 NSECTOR=12;
 
-fixPsfFWHM=true;
 plotOn=false;
 cytoBgFWHM_nm = 1300;
 cytoBgFWHMmin_nm = 1000;
 cytoBgFWHMmax_nm = 2000;
 radMax_nm=600;
+psfWidthExtraNm= 50;%as in +/- psfFWHM
 nargin = numel(varargin);
 ii = 1;
 while ii<=numel(varargin)
-    if strcmp(varargin{ii},'FitFreePsfWidth')%doing this is generally a bad idea
-        fixPsfFWHM=false;
-        ii=ii+1;
+    if strcmp(varargin{ii},'PsfWidthRangeNm')
+        psfWidthExtraNm= varargin{ii+1};
+        ii=ii+2;
     elseif strcmp(varargin{ii},'PlotFit')
         plotOn=true;
         ii=ii+1;
@@ -78,36 +78,21 @@ bg0=mean(im(otsuThresh==1));
 cytoplasmBg0 = 0;
 sectorAmp0(1:NSECTOR) = 1;
 
-
 initGuess = [x0,y0,r0,width0,amplitude0,bg0,cytoplasmBg0,cytoBgWidth,sectorAmp0];
 
-if ~fixPsfFWHM
-    lb =[-inf, -inf,0,0,0,0,0,cytoBgWidthMin,0.*sectorAmp0];
-    ub = [inf,inf,radMax,width0*4,inf,inf,inf,cytoBgWidthMax,1.*sectorAmp0];
-else
-    lb =[-inf, -inf,0,width0,0,0,0,cytoBgWidthMin,0.*sectorAmp0];
-    ub = [inf,inf,radMax,width0,inf,inf,inf,cytoBgWidthMax,1.*sectorAmp0];
-end
-
-if DEBUG_RING
-    widthExtra = 50;
-    wMin = width0-widthExtra/2.35/pixSz_nm;
-    wMax = width0+widthExtra/2.35/pixSz_nm;
-    lb =[-inf, -inf,0,wMin,0,0,0,cytoBgWidthMin,0.*sectorAmp0];
-    ub = [inf,inf,radMax,wMax,inf,inf,inf,cytoBgWidthMax,1.*sectorAmp0];
-end
+wMin = width0-psfWidthExtraNm/2.35/pixSz_nm;
+wMax = width0+psfWidthExtraNm/2.35/pixSz_nm;
+lb =[-inf, -inf,0,wMin,0,0,0,cytoBgWidthMin,0.*sectorAmp0];
+ub = [inf,inf,radMax,wMax,inf,inf,inf,cytoBgWidthMax,1.*sectorAmp0];
 
 imSz = size(im);
 %imageSizeX = imSz(2);
 %imageSizeY = imSz(1);
 %[X, Y] = meshgrid(1:imageSizeX, 1:imageSizeY);
-
-
 %DEBUG
 % figure
 % imagesc(im);
 % pause
-
 
 %opt = optimoptions(@lsqcurvefit,'Display','final');
 opt = optimoptions(@lsqcurvefit,'Display','off');
@@ -123,14 +108,6 @@ ringPar(7) = 0;
 ringPar(6)=0;
 ringIm = ringAndGaussBG_sectored(ringPar,imSz,NSECTOR);
 
-%%REFIT THE BG
-%fitBg_im = im - ringIm;
-%initGuessBg= bgPar;
-%lbBg =[fitPar(1),fitPar(2),fitPar(3),fitPar(4),0,0,0,cytoBgWidthMin,0.*sectorAmp0];
-%ubBg = [fitPar(1),fitPar(2),fitPar(3),fitPar(4),0,inf,inf,cytoBgWidthMax,0.*sectorAmp0];
-%[fitParBg] = lsqcurvefit(@(x, xdata)  ringAndGaussBG_sectored(x, xdata,NSECTOR), ...
-%                         initGuessBg ,imSz,fitBg_im, lbBg,ubBg,opt); % added resnorm 190114 kw
-%bgIm2 =  ringAndGaussBG_sectored(fitParBg,imSz,NSECTOR);
 
 if plotOn || (~isempty(DEBUG_RING) && DEBUG_RING==true)
     figure;
@@ -182,20 +159,11 @@ if plotOn || (~isempty(DEBUG_RING) && DEBUG_RING==true)
     colormap gray;
     axis equal;
     
-    %figure;
-    %imagesc(fitBg_im)
-    %axis equal
-    %figure
-    %imagesc(fitBg_im-bgIm2);
-    %axis equal
-    %figure
-    %imagesc(im-bgIm2);
-    %axis equal
-
     if ~isempty(DEBUG_RING) && DEBUG_RING==true
         keyboard;
+    else
+        pause;
     end
-    %pause
 end
 
 
