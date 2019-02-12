@@ -4,3 +4,4 @@
 !.gitignore
 *~
 *.exe
+./testing/analysed/*
