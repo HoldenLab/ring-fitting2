@@ -66,6 +66,8 @@ fg(BW==0)=0;
 %axis equal;
 %pause
 
+imSz = size(im);
+
 radMax = radMax_nm/pixSz_nm;%Like mad max
 cytoBgWidth = cytoBgFWHM_nm/2.35/pixSz_nm;%manually estimated cytoplasmic gaussian contribution
 cytoBgWidthMin=cytoBgFWHMmin_nm/2.35/pixSz_nm;
@@ -75,17 +77,21 @@ width0 = psfFWHM/2.35/pixSz_nm;
 r0 = min(radGuess(fg),radMax);
 amplitude0 = max(fg(:));
 bg0=mean(im(otsuThresh==1));
-cytoplasmBg0 = 0;
+cytoplasmBg0 = max(im(:));
+cytoplasmBg2_0 = mean(im(:));
+cytoBgWidth2_0 =cytoBgWidth;
 sectorAmp0(1:NSECTOR) = 1;
 
-initGuess = [x0,y0,r0,width0,amplitude0,bg0,cytoplasmBg0,cytoBgWidth,sectorAmp0];
+%initGuess = [x0,y0,r0,width0,amplitude0,bg0,cytoplasmBg0,cytoBgWidth,cytoplasmBg0,cytoBgWidth,sectorAmp0];
+initGuess = [x0,y0,r0,width0,amplitude0,bg0,cytoplasmBg0,cytoBgWidth,cytoplasmBg2_0,cytoBgWidth2_0,sectorAmp0];
 
 wMin = width0-psfWidthExtraNm/2.35/pixSz_nm;
 wMax = width0+psfWidthExtraNm/2.35/pixSz_nm;
-lb =[-inf, -inf,0,wMin,0,0,0,cytoBgWidthMin,0.*sectorAmp0];
-ub = [inf,inf,radMax,wMax,inf,inf,inf,cytoBgWidthMax,1.*sectorAmp0];
+lb =[-inf, -inf,0,wMin,0,0,0,cytoBgWidthMin,0,cytoBgWidthMin,0.*sectorAmp0];
+%lb =[-inf, -inf,0,wMin,0,0,0,0,0,0,0.*sectorAmp0];%TEMP DEBUG TEST
+%ub = [inf,inf,radMax,wMax,inf,inf,inf,cytoBgWidthMax,inf,cytoBgWidthMax,1.*sectorAmp0];
+ub = [inf,inf,radMax,wMax,inf,inf,inf,cytoBgWidthMax,inf,inf,1.*sectorAmp0];%the second blurred bg can be as big as you like
 
-imSz = size(im);
 %imageSizeX = imSz(2);
 %imageSizeY = imSz(1);
 %[X, Y] = meshgrid(1:imageSizeX, 1:imageSizeY);
@@ -97,17 +103,20 @@ imSz = size(im);
 %opt = optimoptions(@lsqcurvefit,'Display','final');
 opt = optimoptions(@lsqcurvefit,'Display','off');
 
-[fitPar] = lsqcurvefit(@(x, xdata)  ringAndGaussBG_sectored(x, xdata,NSECTOR), ...
+[fitPar_lsq] = lsqcurvefit(@(x, xdata)  ringAndGaussBG_sectored(x, xdata,NSECTOR), ...
                          initGuess ,imSz,im, lb,ub,opt); % added resnorm 190114 kw
+[fitPar] = lsqnonlin(@(x)  ringAndGaussBG_sectored_robust(x, im,NSECTOR), ...
+                         initGuess ,lb,ub); 
 fitIm = ringAndGaussBG_sectored(fitPar,imSz,NSECTOR);
 bgPar = fitPar;
 bgPar(5) = 0; %set the ring amp to 0
 bgIm = ringAndGaussBG_sectored(bgPar,imSz,NSECTOR);
 ringIm_noBg = im - bgIm;
-%ringPar = fitPar;
-%ringPar(7) = 0;
-%ringPar(6)=0;
-%ringIm = ringAndGaussBG_sectored(ringPar,imSz,NSECTOR);
+ringPar = fitPar;
+ringPar(7) = 0;
+ringPar(9) = 0;
+ringPar(6)=0;
+ringIm = ringAndGaussBG_sectored(ringPar,imSz,NSECTOR);
 
 
 if plotOn || (~isempty(DEBUG_RING) && DEBUG_RING==true)
@@ -159,8 +168,29 @@ if plotOn || (~isempty(DEBUG_RING) && DEBUG_RING==true)
     imagesc(im-bgIm);
     colormap gray;
     axis equal;
-    
+
+        
     if ~isempty(DEBUG_RING) && DEBUG_RING==true
+        figure;
+        noRing=im-ringIm;
+        imagesc(noRing);
+        axis equal
+        colormap gray
+        title('Subtract the ring fit')
+        tiffwrite('noRingIm.tif',noRing);
+        tiffwrite('bgSub.tif',im-bgIm);
+        %%REFIT THE BG
+        %initGuessBg= bgPar;
+        %lbBg =[fitPar(1),fitPar(2),fitPar(3),fitPar(4),0,0,0,cytoBgWidthMin,0.*sectorAmp0];
+        %ubBg = [fitPar(1),fitPar(2),fitPar(3),fitPar(4),0,inf,inf,cytoBgWidthMax,0.*sectorAmp0];
+        %[fitParBg] = lsqcurvefit(@(x, xdata)  ringAndGaussBG_sectored(x, xdata,NSECTOR), ...
+        %                         initGuessBg ,imSz,noRing, lbBg,ubBg,opt); % added resnorm 190114 kw
+        %bgIm2 =  ringAndGaussBG_sectored(fitParBg,imSz,NSECTOR);
+        %figure;
+        %title('Subtract the ring fit')
+        %imagesc(noRing-bgIm2);
+        %axis equal
+        %colormap gray
         keyboard;
     else
         pause;

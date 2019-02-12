@@ -1,9 +1,10 @@
-function F= ringAndGaussBG_sectored(par,imSz,nSector)
+function resid_w= ringAndGaussBG_sectored_robust(par,im,nSector)
 %parameters: x0, y0, r,widthRing, AmplitudeRing, bg_flat, cytoplasmBgWidth
 
  % Create a logical image of a ring with specified
 % inner diameter, outer diameter center, and image size.
 % First create the image.
+imSz = size(im);
 imageSizeX = imSz(2);
 imageSizeY = imSz(1);
 % Next create the circle in the image.
@@ -39,11 +40,6 @@ for ii = 1:nSector
     sectoredImage(thetaIm>thetaLim(ii) & thetaIm<thetaLim(ii+1)) = ii;
 end
 
-%figure;imagesc(sectoredImage);axis equal;
-%figure;imagesc(sectoredImage2);axis equal;
-%keyboard;
-
-
 
 for ii = 1:nSector
     F_ring(sectoredImage==ii) = sectorAmp(ii)*A.*exp(-(R(sectoredImage==ii)-R0).^2./(2.*stdRing.^2));
@@ -57,6 +53,11 @@ F_cyto = cytoplasmBg.*exp(-((X-X0).^2+(Y-Y0).^2)./(2.*cytoplasmBgWidth.^2));
 F_cyto2 = cytoplasmBg2.*exp(-((X-X0).^2+(Y-Y0).^2)./(2.*cytoplasmBgWidth2.^2));
 
 F=F_bg+F_ring+F_cyto+F_cyto2;
-%figure;imagesc(sectoredImage);axis equal;
-%figure;imagesc(F_ring);axis equal;
-%keyboard
+
+resid = im - F;
+s = mad(resid(:));% median absolute deviation of the residuals
+
+TUNE=4.685;
+r = resid./(TUNE.*s);
+w = (abs(r)<1).*(1 - r.^2).^2;%BISQUARE WEIGHTING
+resid_w = w.*resid; 
