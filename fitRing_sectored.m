@@ -88,7 +88,6 @@ initGuess = [x0,y0,r0,width0,amplitude0,bg0,cytoplasmBg0,cytoBgWidth,cytoplasmBg
 wMin = width0-psfWidthExtraNm/2.35/pixSz_nm;
 wMax = width0+psfWidthExtraNm/2.35/pixSz_nm;
 lb =[-inf, -inf,0,wMin,0,0,0,cytoBgWidthMin,0,cytoBgWidthMin,0.*sectorAmp0];
-%lb =[-inf, -inf,0,wMin,0,0,0,0,0,0,0.*sectorAmp0];%TEMP DEBUG TEST
 %ub = [inf,inf,radMax,wMax,inf,inf,inf,cytoBgWidthMax,inf,cytoBgWidthMax,1.*sectorAmp0];
 ub = [inf,inf,radMax,wMax,inf,inf,inf,cytoBgWidthMax,inf,inf,1.*sectorAmp0];%the second blurred bg can be as big as you like
 
@@ -103,10 +102,8 @@ ub = [inf,inf,radMax,wMax,inf,inf,inf,cytoBgWidthMax,inf,inf,1.*sectorAmp0];%the
 %opt = optimoptions(@lsqcurvefit,'Display','final');
 opt = optimoptions(@lsqcurvefit,'Display','off');
 
-[fitPar_lsq] = lsqcurvefit(@(x, xdata)  ringAndGaussBG_sectored(x, xdata,NSECTOR), ...
+[fitPar] = lsqcurvefit(@(x, xdata)  ringAndGaussBG_sectored(x, xdata,NSECTOR), ...
                          initGuess ,imSz,im, lb,ub,opt); % added resnorm 190114 kw
-[fitPar] = lsqnonlin(@(x)  ringAndGaussBG_sectored_robust(x, im,NSECTOR), ...
-                         initGuess ,lb,ub); 
 fitIm = ringAndGaussBG_sectored(fitPar,imSz,NSECTOR);
 bgPar = fitPar;
 bgPar(5) = 0; %set the ring amp to 0
@@ -177,8 +174,8 @@ if plotOn || (~isempty(DEBUG_RING) && DEBUG_RING==true)
         axis equal
         colormap gray
         title('Subtract the ring fit')
-        tiffwrite('noRingIm.tif',noRing);
-        tiffwrite('bgSub.tif',im-bgIm);
+        tiffwrite('analysed/noRingIm.tif',noRing);
+        tiffwrite('analysed/bgSub.tif',im-bgIm);
         %%REFIT THE BG
         %initGuessBg= bgPar;
         %lbBg =[fitPar(1),fitPar(2),fitPar(3),fitPar(4),0,0,0,cytoBgWidthMin,0.*sectorAmp0];
