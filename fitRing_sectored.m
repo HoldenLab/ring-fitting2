@@ -91,9 +91,6 @@ lb =[-inf, -inf,0,wMin,0,0,0,cytoBgWidthMin,0,cytoBgWidthMin,0.*sectorAmp0];
 %ub = [inf,inf,radMax,wMax,inf,inf,inf,cytoBgWidthMax,inf,cytoBgWidthMax,1.*sectorAmp0];
 ub = [inf,inf,radMax,wMax,inf,inf,inf,cytoBgWidthMax,inf,inf,1.*sectorAmp0];%the second blurred bg can be as big as you like
 
-%imageSizeX = imSz(2);
-%imageSizeY = imSz(1);
-%[X, Y] = meshgrid(1:imageSizeX, 1:imageSizeY);
 %DEBUG
 % figure
 % imagesc(im);

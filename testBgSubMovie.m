@@ -18,4 +18,4 @@ plotOn=true;
 %plotOn=false
 lineWidthNm = pixSz;
 %[imBgSub, ringKymograph, circleData, kymoInfo] = doBgSubAndKymo(imS,pixSz,lineWidthNm, psfFWHM)
-batchAnalyseRing_bgFitter(fname2,pixSz)
+batchAnalyseRing_bgFitter(fname1,pixSz)
