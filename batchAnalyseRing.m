@@ -26,7 +26,6 @@ psfFWHM = 300;
 bleachPlotOn=false;
 nKymoWrap=2;
 nargin = numel(varargin);
-
 ii = 1;
 while ii<=numel(varargin)
     if strcmp(varargin{ii},'PsfWidthRangeNm') || strcmp(varargin{ii},'CytoplasmBG-FWHM') ...
@@ -67,7 +66,7 @@ end
 ringStack = imreadstack(fname);
 
 % calculate the kymograph
-[ ringStack_noBg,kymo,circFit,kymoInfo] = doBgSubAndKymo(ringStack,pixSz,lineProfileWidth,psfFWHM,frStep,ringFitArg{:});
+[ ringStack_noBg,kymo,circFit,kymoInfo] = doBgSubAndKymo(ringStack,pixSz,lineProfileWidth,psfFWHM,ringFitArg{:});
 save([savepath,filesep,fname(1:end-4),'_fitData.mat'],'circFit','kymoInfo');
 %write a text file with the radius for quick reference
 diamNm = round(kymoInfo(:,3))*2;

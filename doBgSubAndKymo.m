@@ -4,7 +4,7 @@ function [ ringStack_noBg, ringKymograph, circleData, kymoInfo] = doBgSubAndKymo
 nargin = numel(varargin);
 fitRingArg={};
 doZeroPadKymo = true;
-doFixedRadiusFit = false;
+doFixedRadiusFit = true;
 ii = 1;
 while ii<=numel(varargin)
     if strcmp(varargin{ii},'ZeroPadKymograph')
