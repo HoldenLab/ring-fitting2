@@ -118,7 +118,7 @@ circleData.r = circ_r;
 
 %------------------------------------------------------------------
 function [profileIntensityWide, profileIntensity1pix] = getProfile(I,samplePts,lineWidthPix,circ_z,circ_r,pixSzNm);
-
+%increase SNR by plotting perpendicular line profile and interpolating centre value
 x = samplePts(:,1);
 y= samplePts(:,2);
 nPt = numel(x);
