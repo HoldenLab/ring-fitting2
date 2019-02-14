@@ -1,10 +1,6 @@
 fileFilter='*.tif';
-kymoPixSz=64;
-kymoWidth=250;
-kymoBgFramespan = 50;
-bleachPlotOn=true;
-useNewFitter=true;
-psfFWHM=250;
-useTLFitter=false;
-frameStep=[];
-batchAnalyseRing(fileFilter,kymoPixSz,kymoWidth,kymoBgFramespan,bleachPlotOn,useNewFitter,psfFWHM,useTLFitter,frameStep)
+pixelSize=64;
+%by default, fits with fixed radius based on average image
+batchAnalyseRing(fileFilter,pixSz)
+%alternatively, fit with a free radius to allow for constriction
+%batchAnalyseRing(fileFilter,pixSz,'FixedRadiusFit',true)
