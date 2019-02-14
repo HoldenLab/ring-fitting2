@@ -4,10 +4,14 @@ function [ ringStack_noBg, ringKymograph, circleData, kymoInfo] = doBgSubAndKymo
 nargin = numel(varargin);
 fitRingArg={};
 doZeroPadKymo = true;
+doFixedRadiusFit = false;
 ii = 1;
 while ii<=numel(varargin)
     if strcmp(varargin{ii},'ZeroPadKymograph')
         doZeroPadKymo=varargin{ii+1};
+        ii=ii+2;
+    elseif strcmp(varargin{ii},'FixedRadiusFit')
+        doFixedRadiusFit=varargin{ii+1};
         ii=ii+2;
     else
         fitRingArg={fitRingArg{:},varargin{ii}};
@@ -17,14 +21,21 @@ end
 
 ringStack = double(ringStack);
 
-nFr = size(ringStack,3);
+%optionally find the radius etc from the average of whole movie
+if doFixedRadiusFit
+    ringAvg = mean(ringStack,3);
+    fitParAvg = fitRing_sectored(ringAvg, pixSzNm,psfFWHM, fitRingArg{:});
+else
+    fitParAvg=[];
+end
 
+nFr = size(ringStack,3);
 ringStack_noBg = 0.*ringStack;
 for ii =1:nFr
     
     %fit each ring.
     display(['Frame: ',num2str(ii)]);
-    [ringIm_noBg, ringKymoCell{ii}, circleData{ii}] = bgSubAndProfile(ringStack(:,:,ii),pixSzNm,lineWidthNm, psfFWHM,fitRingArg{:});
+    [ringIm_noBg, ringKymoCell{ii}, circleData{ii}] = bgSubAndProfile(ringStack(:,:,ii),pixSzNm,lineWidthNm, psfFWHM,doFixedRadiusFit,fitParAvg,fitRingArg{:});
     kymoSz(ii,:) = size(ringKymoCell{ii});
     rNm=circleData{ii}.r*pixSzNm;
     kymoInfo(ii,:) = [ii,rNm,kymoSz(ii,1),kymoSz(ii,2)];
@@ -43,13 +54,18 @@ end
 
 
 %------------------------------------------------------------------
-function [ringIm_noBg,ringIntensity, circleData] = bgSubAndProfile(ringIm,pixSzNm,lineWidthNm, psfFWHM,varargin)
+function [ringIm_noBg,ringIntensity, circleData] = bgSubAndProfile(ringIm,pixSzNm,lineWidthNm, psfFWHM,doFixedRadiusFit,fitParAvg,varargin)
 %extract circular kymograph, integrating over widthNM annulus thickness
 %use fitting to the ring to find the diameter, should make it more robust eg on small rings
 
 
 %fit blurred ring to the image
-[fitPar,~,ringIm_noBg] = fitRing_sectored(ringIm, pixSzNm,psfFWHM, varargin{:});
+if doFixedRadiusFit
+    [fitPar,~,ringIm_noBg] = fitRing_sectored(ringIm, pixSzNm,psfFWHM, varargin{:});
+else 
+    [fitPar,~,ringIm_noBg] = fitRing_sectored(ringIm, pixSzNm,psfFWHM, varargin{:});
+end
+
 x=fitPar(1);
 y=fitPar(2);
 circ_z=[x,y];
