@@ -1,4 +1,4 @@
-function [ ringStack_noBg, ringKymograph, circleData, kymoInfo] = doBgSubAndKymo(ringStack,pixSzNm,lineWidthNm, psfFWHM,varargin)
+function [ ringStack_noBg, ringKymograph, circleData, kymoInfo, rawKymograph] = doBgSubAndKymo(ringStack,pixSzNm,lineWidthNm, psfFWHM,varargin)
 % function [ ringStack_noBg, ringKymograph, circleData, kymoInfo] = doBgSubAndKymo(ringStack,pixSzNm,lineWidthNm, psfFWHM,varargin)
 %extract circular kymograph, integrating over widthNM annulus thickness
 %use fitting to the ring to find the diameter, should make it more robust eg on small rings
@@ -55,7 +55,7 @@ for ii =1:nFr
     
     %fit each ring.
     display(['Frame: ',num2str(ii)]);
-    [ringIm_noBg, ringKymoCell{ii}, circleData{ii}] = bgSubAndProfile(ringStack(:,:,ii),pixSzNm,lineWidthNm, psfFWHM,doFixedRadiusFit,fitParAvg,fitRingArg{:});
+    [ringIm_noBg, ringKymoCell{ii}, circleData{ii}, rawKymoCell{ii}] = bgSubAndProfile(ringStack(:,:,ii),pixSzNm,lineWidthNm, psfFWHM,doFixedRadiusFit,fitParAvg,fitRingArg{:});
     kymoSz(ii,:) = size(ringKymoCell{ii});
     rNm=circleData{ii}.r*pixSzNm;
     kymoInfo(ii,:) = [ii,rNm,kymoSz(ii,1),kymoSz(ii,2)];
@@ -64,17 +64,19 @@ end
 
 maxKymoWidth = max(kymoSz(:,2));
 ringKymograph = zeros(nFr,maxKymoWidth);
+rawKymograph = zeros(nFr,maxKymoWidth);
 for ii = 1:nFr
     ringKymograph(ii,1:kymoSz(ii,2))=ringKymoCell{ii};
+    rawKymograph(ii,1:kymoSz(ii,2))=rawKymoCell{ii};
 end
 
-if doZeroPadKymo
+if doZeroPadKymo%no point in padding the raw kymograph
     ringKymograph(end+1,:)=0;
 end
 
 
 %------------------------------------------------------------------
-function [ringIm_noBg,ringIntensity, circleData] = bgSubAndProfile(ringIm,pixSzNm,lineWidthNm, psfFWHM,doFixedRadiusFit,fitParAvg,varargin)
+function [ringIm_noBg,ringIntensity, circleData, rawRingIntensity] = bgSubAndProfile(ringIm,pixSzNm,lineWidthNm, psfFWHM,doFixedRadiusFit,fitParAvg,varargin)
 %extract circular kymograph, integrating over widthNM annulus thickness
 %use fitting to the ring to find the diameter, should make it more robust eg on small rings
 
@@ -107,6 +109,8 @@ lineWidthPix = lineWidthNm/pixSzNm;
 ringProfile=[];
 [ringIntensity] = getProfile(ringIm_noBg,Pcirc,lineWidthPix,circ_z,circ_r,pixSzNm);
 ringIntensity = ringIntensity(:)';
+[rawRingIntensity] = getProfile(ringIm,Pcirc,lineWidthPix,circ_z,circ_r,pixSzNm);
+rawRingIntensity = rawRingIntensity(:)';
 
 circleData.coord = Pcirc;
 circleData.z = circ_z;

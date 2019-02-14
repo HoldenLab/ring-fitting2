@@ -8,7 +8,6 @@ fname2='180327_Sam1_1mW_RingHiLO_2_MMStack_Pos0.ome_denoise_reg_ring11.tif';
 
 pixSz = 65; % [nm]
 psfFWHM = 300; % [nm]Check with beads
-nFrame=size(imS,3);
 fRate=2;
 
 %option to fix the radius
@@ -18,5 +17,6 @@ plotOn=true;
 %plotOn=false
 lineWidthNm = pixSz;
 %[imBgSub, ringKymograph, circleData, kymoInfo] = doBgSubAndKymo(imS,pixSz,lineWidthNm, psfFWHM)
-batchAnalyseRing(fname1,pixSz,'FixedRadiusFit',true)
-%batchAnalyseRing(fname1,pixSz,'FixedRadiusFit',false)
+batchAnalyseRing(fname2,pixSz,'FixedRadiusFit',true)
+%batchAnalyseRing(fname2,pixSz,'FixedRadiusFit',false)
+batchAnalyseRing(fname2,pixSz,'FixedRadiusFit',true,'SaveRawKymograph',true)

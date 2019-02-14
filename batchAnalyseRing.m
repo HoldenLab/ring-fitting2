@@ -18,6 +18,7 @@ function batchAnalyseRing(fileFilter,pixSz,varargin)
 %   'FixedRadiusFit', doFixedRadiusFit: Fix the ring radius and position to the average ring position. Useful for cells that dont constrict within timeframe of imaging. If the cells constrict you need to turn this off. DEFAULT: true 
 %   'LineProfleWidth': LineWidth: perpendicular distance over which to integrate line profile signal to improve SNR. DEFAULT:pixSz , ie 1 pixel
 %   'NumKymoRepeats', nKymoWrap: Number of times to plot the kymograph side-by-side in the kymoWrap file. DEFAULT: 2
+%   'SaveRawKymograph', doSaveRawKymograph: Save a non-background subtracted kymograph as well. DEFAULT, false
 %
 % OUTPUTS:
 %   Files, in subdirectory analysed:
@@ -52,6 +53,7 @@ lineProfileWidth = pixSz;
 psfFWHM = 300;
 bleachPlotOn=false;
 nKymoWrap=2;
+doSaveRawKymograph = false;
 nargin = numel(varargin);
 ii = 1;
 while ii<=numel(varargin)
@@ -69,6 +71,9 @@ while ii<=numel(varargin)
         ii=ii+2;
     elseif strcmp(varargin{ii},'NumKymoRepeats')
         nKymoWrap=varargin{ii+1};
+        ii=ii+2;
+    elseif strcmp(varargin{ii},'SaveRawKymograph')
+        doSaveRawKymograph=varargin{ii+1};
         ii=ii+2;
     else
         ii=ii+1;
@@ -93,7 +98,7 @@ end
 ringStack = imreadstack(fname);
 
 % calculate the kymograph
-[ ringStack_noBg,kymo,circFit,kymoInfo] = doBgSubAndKymo(ringStack,pixSz,lineProfileWidth,psfFWHM,ringFitArg{:});
+[ ringStack_noBg,kymo,circFit,kymoInfo, kymoraw] = doBgSubAndKymo(ringStack,pixSz,lineProfileWidth,psfFWHM,ringFitArg{:});
 save([savepath,filesep,fname(1:end-4),'_fitData.mat'],'circFit','kymoInfo');
 %write a text file with the radius for quick reference
 diamNm = round(kymoInfo(:,3))*2;
@@ -102,8 +107,14 @@ dlmwrite(radius_fname,diamNm);
 
 %make 2pi versions of everything for convenience
 kymo_wrap = repmat(kymo,[1,nKymoWrap]);
+kymoraw_wrap = repmat(kymoraw,[1,nKymoWrap]);
 
 %save everything as floats if that's what's returned
 tiffwrite([savepath,filesep,fname(1:end-4),'_bgsub.tif'],ringStack_noBg);
 tiffwrite([savepath,filesep,fname(1:end-4),'_kymo.tif'],kymo);
 tiffwrite([savepath,filesep,fname(1:end-4),'_kymoWrap.tif'],kymo_wrap);
+if doSaveRawKymograph
+    tiffwrite([savepath,filesep,fname(1:end-4),'_kymoRaw.tif'],kymoraw);
+    tiffwrite([savepath,filesep,fname(1:end-4),'_kymoRawWrap.tif'],kymoraw_wrap);
+end
+
