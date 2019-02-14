@@ -17,6 +17,6 @@ plotOn=true;
 %plotOn=false
 lineWidthNm = pixSz;
 %[imBgSub, ringKymograph, circleData, kymoInfo] = doBgSubAndKymo(imS,pixSz,lineWidthNm, psfFWHM)
-batchAnalyseRing(fname2,pixSz,'FixedRadiusFit',true)
+%batchAnalyseRing(fname2,pixSz,'FixedRadiusFit',true)
 %batchAnalyseRing(fname2,pixSz,'FixedRadiusFit',false)
-batchAnalyseRing(fname2,pixSz,'FixedRadiusFit',true,'SaveRawKymograph',true)
+batchAnalyseRing(fname2,pixSz,'FixedRadiusFit',false,'SaveRawKymograph',true)
