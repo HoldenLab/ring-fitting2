@@ -29,21 +29,11 @@ nargin = numel(varargin);
 
 ii = 1;
 while ii<=numel(varargin)
-    if strcmp(varargin{ii},'PsfWidthRangeNm')%doing this is generally a bad idea
+    if strcmp(varargin{ii},'PsfWidthRangeNm') || strcmp(varargin{ii},'CytoplasmBG-FWHM') ...
+        || strcmp(varargin{ii},'CytoplasmBG-FWHM-min') || strcmp(varargin{ii},'CytoplasmBG-FWHM-max') ...
+        || strcmp(varargin{ii},'RingRadius-max') || strcmp(varargin{ii},'ZeroPadKymograph')
         ringFitArg={ringFitArg{:},varargin{ii:ii+1}};
         ii=ii+1;
-    elseif strcmp(varargin{ii},'CytoplasmBG-FWHM')
-        ringFitArg={ringFitArg{:},varargin{ii:ii+1}};
-        ii=ii+2;
-    elseif strcmp(varargin{ii},'CytoplasmBG-FWHM-min')
-        ringFitArg={ringFitArg{:},varargin{ii:ii+1}};
-        ii=ii+2;
-    elseif strcmp(varargin{ii},'CytoplasmBG-FWHM-max')
-        ringFitArg={ringFitArg{:},varargin{ii:ii+1}};
-        ii=ii+2;
-    elseif strcmp(varargin{ii},'RingRadius-max') %best to set this pretty close to the max plausible ring radius
-        ringFitArg={ringFitArg{:},varargin{ii:ii+1}};
-        ii=ii+2;
     elseif strcmp(varargin{ii},'PsfFWHM')
         psfFWHM=varargin{ii+1};
         ii=ii+2;
@@ -84,6 +74,7 @@ radius_fname = [savepath,filesep,fname(1:end-4),'_diamInfo','.txt'];
 dlmwrite(radius_fname,diamNm);
 
 
+%DEBUG CODE
 %hFig =gcf;
 %hold off;
 %imagesc(ringStack(:,:,1))
@@ -98,7 +89,7 @@ dlmwrite(radius_fname,diamNm);
 %axis equal;
 %colormap('gray');
 %saveas(hFig, [savepath,filesep,fname(1:end-4),'_circFit.png']);
-
+%END DEBUG
 
 %make 2pi versions of everything for convenience
 kymo_wrap = repmat(kymo,[1,nKymoWrap]);

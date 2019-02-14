@@ -29,9 +29,22 @@ function [ringIm_noBg,ringIntensity, circleData] = bgSubAndProfile(ringIm,pixSzN
 %extract circular kymograph, integrating over widthNM annulus thickness
 %use fitting to the ring to find the diameter, should make it more robust eg on small rings
 
+nargin = numel(varargin);
+fitRingArg={:};
+doZeroPad = true;
+ii = 1;
+while ii<=numel(varargin)
+    if strcmp(varargin{ii},'ZeroPadKymograph')
+        doZeroPadKymo=varargin{ii+1};
+        ii=ii+2;
+    else
+        fitRingArg={fitRingArg{:},varargin{ii}};
+        ii=ii+1;
+    end
+end
 
 %fit blurred ring to the image
-[fitPar,~,ringIm_noBg] = fitRing_sectored(ringIm, pixSzNm,psfFWHM, varargin{:});
+[fitPar,~,ringIm_noBg] = fitRing_sectored(ringIm, pixSzNm,psfFWHM, fitRingArg{:});
 x=fitPar(1);
 y=fitPar(2);
 circ_z=[x,y];
