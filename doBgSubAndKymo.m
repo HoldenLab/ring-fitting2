@@ -61,9 +61,9 @@ function [ringIm_noBg,ringIntensity, circleData] = bgSubAndProfile(ringIm,pixSzN
 
 %fit blurred ring to the image
 if doFixedRadiusFit
-    [fitPar,~,ringIm_noBg] = fitRing_sectored(ringIm, pixSzNm,psfFWHM, varargin{:});
+    [fitPar,~,ringIm_noBg] = fitRing(ringIm, pixSzNm,psfFWHM, varargin{:});
 else 
-    [fitPar,~,ringIm_noBg] = fitRing_sectored(ringIm, pixSzNm,psfFWHM, varargin{:});
+    [fitPar,~,ringIm_noBg] = fitRing(ringIm, pixSzNm,psfFWHM, varargin{:});
 end
 
 x=fitPar(1);
