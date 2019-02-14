@@ -1,5 +1,5 @@
 # ring-fitting2
-Library for background subtraction and kymograph fitting for vertically immobilized cells 
+Library for background subtraction and kymograph fitting for fluorescence microscopy of vertically immobilized bacteria 
 
 batchAnalyseRing.m : USE THIS to run everything. Analyses one or more ring movies to background subtract and plot kymogrpaphs. See documentation in the file.   
 
