@@ -24,7 +24,7 @@ ringStack = double(ringStack);
 %optionally find the radius etc from the average of whole movie
 if doFixedRadiusFit
     ringAvg = mean(ringStack,3);
-    fitParAvg = fitRing_sectored(ringAvg, pixSzNm,psfFWHM, fitRingArg{:});
+    fitParAvg = fitRing(ringAvg, pixSzNm,psfFWHM, fitRingArg{:});
 else
     fitParAvg=[];
 end
@@ -61,7 +61,7 @@ function [ringIm_noBg,ringIntensity, circleData] = bgSubAndProfile(ringIm,pixSzN
 
 %fit blurred ring to the image
 if doFixedRadiusFit
-    [fitPar,~,ringIm_noBg] = fitRing(ringIm, pixSzNm,psfFWHM, varargin{:});
+    [fitPar,~,ringIm_noBg] = fitRing(ringIm, pixSzNm,psfFWHM, 'FixedRadiusFit', fitParAvg, varargin{:});
 else 
     [fitPar,~,ringIm_noBg] = fitRing(ringIm, pixSzNm,psfFWHM, varargin{:});
 end
@@ -70,6 +70,7 @@ x=fitPar(1);
 y=fitPar(2);
 circ_z=[x,y];
 circ_r=fitPar(3);
+
 % calculate a single pixel of circumference and use that as the 
 % spacing to sample the circle
 theta_step = 1/circ_r;

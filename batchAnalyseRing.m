@@ -1,4 +1,4 @@
-function batchAnalyseRing_bgFitter(fileFilter,pixSz,varargin)
+function batchAnalyseRing(fileFilter,pixSz,varargin)
 % function batchAnalyseRing(fileFilter,pixSz,kymoWidth,kymoBgFramespan,bleachPlotOn)
 f = dir(fileFilter);
 nF= numel(f);
@@ -31,7 +31,8 @@ ii = 1;
 while ii<=numel(varargin)
     if strcmp(varargin{ii},'PsfWidthRangeNm') || strcmp(varargin{ii},'CytoplasmBG-FWHM') ...
         || strcmp(varargin{ii},'CytoplasmBG-FWHM-min') || strcmp(varargin{ii},'CytoplasmBG-FWHM-max') ...
-        || strcmp(varargin{ii},'RingRadius-max') || strcmp(varargin{ii},'ZeroPadKymograph')
+        || strcmp(varargin{ii},'RingRadius-max') || strcmp(varargin{ii},'ZeroPadKymograph')...
+        || strcmp(varargin{ii},'FixedRadiusFit')
         ringFitArg={ringFitArg{:},varargin{ii:ii+1}};
         ii=ii+1;
     elseif strcmp(varargin{ii},'PsfFWHM')

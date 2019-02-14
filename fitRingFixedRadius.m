@@ -1,4 +1,4 @@
-function [fitPar, fitIm,ringIm_noBg] = fitRing(im, pixSz_nm,psfFWHM, varargin)
+function [fitPar, fitIm,ringIm_noBg] = fitRingFixedRadius(im, pixSz_nm,psfFWHM,fitParAvg, varargin)
 global DEBUG_RING
 %parameters: x0, y0, r,width, Amplitude, BG, cytoplasmBg
 NSECTOR=12;
@@ -9,7 +9,6 @@ cytoBgFWHMmin_nm = 1000;
 cytoBgFWHMmax_nm = 2000;
 radMax_nm=600;
 psfWidthExtraNm= 50;%as in +/- psfFWHM
-doFixedRadiusFit=true;
 nargin = numel(varargin);
 ii = 1;
 while ii<=numel(varargin)
@@ -31,18 +30,22 @@ while ii<=numel(varargin)
     elseif strcmp(varargin{ii},'RingRadius-max') %best to set this pretty close to the max plausible ring radius
         radMax_nm= varargin{ii+1};
         ii=ii+2;
-    elseif strcmp(varargin{ii},'FixedRadiusFit') %best to set this pretty close to the max plausible ring radius
-        doFixedRadiusFit = true;
-        fitParAvg= varargin{ii+1};
-        ii=ii+2;
     else
         ii=ii+1;
     end
 end
 
-imBlur = imgaussfilt(im,1);
+%fixed position parameters derived from averaged image in prior fit
+positionParam.X0 = fitParAvg(1);
+positionParam.Y0 = fitParAvg(2);
+positionParam.R0 = fitParAvg(3);
+positionParam.stdRing = fitParAvg(4);
+positionParam.cytoplasmBgWidth=fitParAvg(8);
+positionParam.cytoplasmBgWidth2=fitParAvg(10);
+
 %guess parameters
 %segment image, ignore background
+imBlur = imgaussfilt(im,1);
 otsuThresh= otsu(imBlur);
 fg = im;
 fg(otsuThresh==1)=0;
@@ -51,48 +54,34 @@ BW0=logical(fg);
 BW = bwareafilt(BW0,1,'largest');
 fg(BW==0)=0;
 
-%[x0C, y0C] = imCentreofMass(fg);%this sucks for uneven rings
-%better use non intensity weighted avg
-[x0, y0] = imBinaryCentreofMass(fg);
-
 imSz = size(im);
+amplitude0 = max(fg(:));
+bg0=mean(im(otsuThresh==1));
+cytoplasmBg0 = max(im(:));
+cytoplasmBg2_0 = mean(im(:));
+sectorAmp0(1:NSECTOR) = 1;
 
+%DEBUG 
+% try the free ring code
+initGuess = fitParAvg;
 radMax = radMax_nm/pixSz_nm;%Like mad max
 cytoBgWidth = cytoBgFWHM_nm/2.35/pixSz_nm;%manually estimated cytoplasmic gaussian contribution
 cytoBgWidthMin=cytoBgFWHMmin_nm/2.35/pixSz_nm;
 cytoBgWidthMax=cytoBgFWHMmax_nm/2.35/pixSz_nm;
 width0 = psfFWHM/2.35/pixSz_nm;
-
-r0 = min(radGuess(fg),radMax);
-amplitude0 = max(fg(:));
-bg0=mean(im(otsuThresh==1));
-cytoplasmBg0 = max(im(:));
-cytoplasmBg2_0 = mean(im(:));
-cytoBgWidth2_0 =cytoBgWidth;
-sectorAmp0(1:NSECTOR) = 1;
-
-
-if doFixedRadiusFit
-    initGuess = fitParAvg;
-    lb = [fitParAvg(1), fitParAvg(2), fitParAvg(3), fitParAvg(4),0,0,0,fitParAvg(8),0,fitParAvg(10),zeros(size(sectorAmp0))];
-    ub = [fitParAvg(1), fitParAvg(2), fitParAvg(3), fitParAvg(4),inf,inf,inf,fitParAvg(8),inf,fitParAvg(10),ones(size(sectorAmp0))];
-else
-    initGuess = [x0,y0,r0,width0,amplitude0,bg0,cytoplasmBg0,cytoBgWidth,cytoplasmBg2_0,cytoBgWidth2_0,sectorAmp0];
-    wMin = width0-psfWidthExtraNm/2.35/pixSz_nm;
-    wMax = width0+psfWidthExtraNm/2.35/pixSz_nm;
-    lb =[-inf, -inf,0,wMin,0,0,0,cytoBgWidthMin,0,cytoBgWidthMin,zeros(size(sectorAmp0))];
-    ub = [inf,inf,radMax,wMax,inf,inf,inf,cytoBgWidthMax,inf,inf,ones(size(sectorAmp0))];%the second blurred bg can be as big as you like
-end
-
+wMin = width0-psfWidthExtraNm/2.35/pixSz_nm;
+wMax = width0+psfWidthExtraNm/2.35/pixSz_nm;
+%lb =[-inf, -inf,0,wMin,0,0,0,cytoBgWidthMin,0,cytoBgWidthMin,zeros(size(sectorAmp0))];
+%ub = [inf,inf,radMax,wMax,inf,inf,inf,cytoBgWidthMax,inf,inf,ones(size(sectorAmp0))];%the second blurred bg can be as big as you like
+lb = [fitParAvg(1), fitParAvg(2), fitParAvg(3), fitParAvg(4),0,0,0,fitParAvg(8),0,fitParAvg(10),zeros(size(sectorAmp0))];
+ub = [fitParAvg(1), fitParAvg(2), fitParAvg(3), fitParAvg(4),inf,inf,inf,fitParAvg(8),inf,fitParAvg(10),ones(size(sectorAmp0))];%the second blurred bg can be as big as you like
 if DEBUG_RING
     opt = optimoptions(@lsqcurvefit,'Display','final');
 else
     opt = optimoptions(@lsqcurvefit,'Display','off');
 end
-
 [fitPar] = lsqcurvefit(@(x, xdata)  ringAndGaussBG(x, xdata,NSECTOR), ...
                          initGuess ,imSz,im, lb,ub,opt); 
-
 fitIm = ringAndGaussBG(fitPar,imSz,NSECTOR);
 bgPar = fitPar;
 bgPar(5) = 0; %set the ring amp to 0
@@ -103,6 +92,7 @@ ringPar(7) = 0;
 ringPar(9) = 0;
 ringPar(6)=0;
 ringIm = ringAndGaussBG(ringPar,imSz,NSECTOR);
+%END DEBUG
 
 
 if plotOn || (~isempty(DEBUG_RING) && DEBUG_RING==true)
@@ -110,10 +100,9 @@ if plotOn || (~isempty(DEBUG_RING) && DEBUG_RING==true)
 
     subplot(2,2,1);
     title('raw');
-    x = fitPar(1);
-    y = fitPar(2);
-    r = fitPar(3);
-    r0*pixSz_nm;
+    x = positionParam.X0;
+    y = positionParam.Y0;
+    r = positionParam.R0;
 
     %figure; 
     hold off;
@@ -126,16 +115,7 @@ if plotOn || (~isempty(DEBUG_RING) && DEBUG_RING==true)
     xunit = r * cos(th) + x;
     yunit = r * sin(th) + y;
     plot(xunit, yunit,'r');
-%     initial guess
-    th = 0:pi/50:2*pi;
-    xunit = r0 * cos(th) + x0;
-    yunit = r0 * sin(th) + y0;
-    plot(xunit, yunit,'g');
-    axis equal;
-%     legend('Fit','Initial Guess');
-    %figure;
-    %imagesc(fitIm);
-    %axis equal;
+    axis equal
 
     subplot(2,2,2);
     title('fitted image');
@@ -157,6 +137,12 @@ if plotOn || (~isempty(DEBUG_RING) && DEBUG_RING==true)
 
         
     if ~isempty(DEBUG_RING) && DEBUG_RING==true
+        ringPar = fitPar;
+        %update the correct ring par HERE TODO
+        ringPar(2) = 0;
+        ringPar(3) = 0;
+        ringPar(4)=0;
+        ringIm = ringAndGaussBG_fixedRad(ringPar,imSz,NSECTOR,positionParam);
         figure;
         noRing=im-ringIm;
         imagesc(noRing);
