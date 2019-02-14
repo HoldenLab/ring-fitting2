@@ -73,24 +73,6 @@ diamNm = round(kymoInfo(:,3))*2;
 radius_fname = [savepath,filesep,fname(1:end-4),'_diamInfo','.txt'];
 dlmwrite(radius_fname,diamNm);
 
-
-%DEBUG CODE
-%hFig =gcf;
-%hold off;
-%imagesc(ringStack(:,:,1))
-%hold all;
-%if ~useTLFitter
-%    scatter(circFit.coord(:,1),circFit.coord(:,2),circFit.coord(:,4)+1);
-%else
-%    for ii = 1:numel(circFit);
-%        scatter(circFit{ii}.coord(:,1),circFit{ii}.coord(:,2),circFit{ii}.coord(:,4)+1);
-%    end
-%end
-%axis equal;
-%colormap('gray');
-%saveas(hFig, [savepath,filesep,fname(1:end-4),'_circFit.png']);
-%END DEBUG
-
 %make 2pi versions of everything for convenience
 kymo_wrap = repmat(kymo,[1,nKymoWrap]);
 

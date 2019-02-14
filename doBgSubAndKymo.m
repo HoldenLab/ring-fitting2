@@ -1,6 +1,19 @@
 function [ ringStack_noBg, ringKymograph, circleData, kymoInfo] = doBgSubAndKymo(ringStack,pixSzNm,lineWidthNm, psfFWHM,varargin)
 %extract circular kymograph, integrating over widthNM annulus thickness
 %use fitting to the ring to find the diameter, should make it more robust eg on small rings
+nargin = numel(varargin);
+fitRingArg={};
+doZeroPadKymo = true;
+ii = 1;
+while ii<=numel(varargin)
+    if strcmp(varargin{ii},'ZeroPadKymograph')
+        doZeroPadKymo=varargin{ii+1};
+        ii=ii+2;
+    else
+        fitRingArg={fitRingArg{:},varargin{ii}};
+        ii=ii+1;
+    end
+end
 
 ringStack = double(ringStack);
 
@@ -11,7 +24,7 @@ for ii =1:nFr
     
     %fit each ring.
     display(['Frame: ',num2str(ii)]);
-    [ringIm_noBg, ringKymoCell{ii}, circleData{ii}] = bgSubAndProfile(ringStack(:,:,ii),pixSzNm,lineWidthNm, psfFWHM,varargin{:});
+    [ringIm_noBg, ringKymoCell{ii}, circleData{ii}] = bgSubAndProfile(ringStack(:,:,ii),pixSzNm,lineWidthNm, psfFWHM,fitRingArg{:});
     kymoSz(ii,:) = size(ringKymoCell{ii});
     rNm=circleData{ii}.r*pixSzNm;
     kymoInfo(ii,:) = [ii,rNm,kymoSz(ii,1),kymoSz(ii,2)];
@@ -24,27 +37,19 @@ for ii = 1:nFr
     ringKymograph(ii,1:kymoSz(ii,2))=ringKymoCell{ii};
 end
 
+if doZeroPadKymo
+    ringKymograph(end+1,:)=0;
+end
+
+
 %------------------------------------------------------------------
 function [ringIm_noBg,ringIntensity, circleData] = bgSubAndProfile(ringIm,pixSzNm,lineWidthNm, psfFWHM,varargin)
 %extract circular kymograph, integrating over widthNM annulus thickness
 %use fitting to the ring to find the diameter, should make it more robust eg on small rings
 
-nargin = numel(varargin);
-fitRingArg={:};
-doZeroPad = true;
-ii = 1;
-while ii<=numel(varargin)
-    if strcmp(varargin{ii},'ZeroPadKymograph')
-        doZeroPadKymo=varargin{ii+1};
-        ii=ii+2;
-    else
-        fitRingArg={fitRingArg{:},varargin{ii}};
-        ii=ii+1;
-    end
-end
 
 %fit blurred ring to the image
-[fitPar,~,ringIm_noBg] = fitRing_sectored(ringIm, pixSzNm,psfFWHM, fitRingArg{:});
+[fitPar,~,ringIm_noBg] = fitRing_sectored(ringIm, pixSzNm,psfFWHM, varargin{:});
 x=fitPar(1);
 y=fitPar(2);
 circ_z=[x,y];
@@ -59,12 +64,6 @@ theta = 0:theta_step:2*pi;
 distStep =cumsum([0,ones(1,numel(theta)-1)*abs(theta(2)-theta(1))]);
 Pcirc = [circ_z(1)+circ_r*cos(theta(:)), circ_z(2)+circ_r*sin(theta(:)), theta(:), distStep(:)];
 
-%%DEBUG
-%figure;
-%imagesc(ringIm);
-%hold all;
-%plot(Pout(:,1),Pout(:,2));
-%plot(Pcirc(:,1),Pcirc(:,2));
 
 %use this to plot a profile for all frames (lineWidth wide)
 lineWidthPix = lineWidthNm/pixSzNm;
@@ -100,15 +99,6 @@ for ii = 1:nPt
     lineProfile = interp2(Xim,Yim,I,Xline(:,1),Xline(:,2),'cubic');
     profileIntensityWide(ii) =trapz(dL,lineProfile);
     profileIntensity1pix(ii) = interp2(Xim,Yim,I,x(ii),y(ii),'cubic');
-    %figure(1);
-    %hold off
-    %imagesc(I);
-    %hold all;
-    %plot(XC(1),XC(2),'x');
-    %plot(Xline(:,1),Xline(:,2),'-');
-    %figure(2);
-    %plot(dL,lineProfile);
-    %pause
 end
 
 
