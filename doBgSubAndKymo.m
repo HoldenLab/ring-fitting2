@@ -1,6 +1,26 @@
 function [ ringStack_noBg, ringKymograph, circleData, kymoInfo] = doBgSubAndKymo(ringStack,pixSzNm,lineWidthNm, psfFWHM,varargin)
+% function [ ringStack_noBg, ringKymograph, circleData, kymoInfo] = doBgSubAndKymo(ringStack,pixSzNm,lineWidthNm, psfFWHM,varargin)
 %extract circular kymograph, integrating over widthNM annulus thickness
 %use fitting to the ring to find the diameter, should make it more robust eg on small rings
+%   Performs background subtraction and kymograph fitting for vertically immobilized cells
+%   Kymographs are background subtracted ie zero should equal a genuine gap in the ring
+%   TODO: Optional plotting of the raw (non-bg subtracted kymograph)
+% INPUTS:
+%   ringStack: [y,x,frame] ring dynamics movie 
+%   pixSz: Camera pixel size in nanometres
+%   lineWidthNm: perpendicular distance over which to integrate line profile signal to improve SNR. 
+%   psfFWHM: Fitted PSF FWHM, nm. Determines PSF size used to blur the fitted ring. 
+% 
+% OPTIONAL INPUTS:
+%   'PsfWidthRangeNm',psfWidthExtraNm: Wiggle room allowed on fitted PSF FHWM. Ie fitted PSF width can be within range psfFWHM +/- psfWidthExtraNm. DEFAULT: 50
+%   'CytoplasmBG-FWHM', cytoBgFWHM_nm: Initial guess for the FWHM of the large gaussian fitted to account for the defocussed cytoplasmic background. DEFAULT:1300
+%   'CytoplasmBG-FWHM-min', cytoBgFWHMmin_nm: Minimum for the FWHM of the large gaussian fitted to account for the defocussed cytoplasmic background. DEFAULT:1000
+%   'CytoplasmBG-FWHM-max', cytoBgFWHMmax_nm: Maximum for the FWHM of the large gaussian fitted to account for the defocussed cytoplasmic background. DEFAULT:1000
+% NOTE: A second defocussed Gaussian is also fitted, with min width cytoBgFWHMmin_nm, and max width=Inf because a single gaussian does not fit well the cytoplasmic BG distribution.
+%   'RingRadius-max', radMax_nm: Maximum fitted ring radius. Default should hold well for WT or even most mutant Bsubtilis but change if in a different organism. If you set it too large the fitting becomes unstable for small rings. DEFAULT: 600
+%   'ZeroPadKymograph', doZeroPadKymo: Add a zero row as the last row of the kymograph so that ImageJ plotting defaults to the correct contrast. DEFAULT: true
+%   'FixedRadiusFit', doFixedRadiusFit: Fix the ring radius and position to the average ring position. Useful for cells that dont constrict within timeframe of imaging. If the cells constrict you need to turn this off. DEFAULT: true 
+
 nargin = numel(varargin);
 fitRingArg={};
 doZeroPadKymo = true;

@@ -1,5 +1,32 @@
 function batchAnalyseRing(fileFilter,pixSz,varargin)
-% function batchAnalyseRing(fileFilter,pixSz,kymoWidth,kymoBgFramespan,bleachPlotOn)
+% function batchAnalyseRing(fileFilter,pixSz,varargin)
+%   Performs background subtraction and kymograph fitting for vertically immobilized cells
+%   Kymographs are background subtracted ie zero should equal a genuine gap in the ring
+%   TODO: Optional plotting of the raw (non-bg subtracted kymograph)
+% INPUTS:
+%   fileFilter: Search string for files to analyse, eg '*.tif'
+%   pixSz: Camera pixel size in nanometres
+% OPTIONAL INPUTS:
+%   'PsfFWHM', psfFWHM: Fitted PSF FWHM, nm. Determines PSF size used to blur the fitted ring. DEFAULT: 300 nm
+%   'PsfWidthRangeNm',psfWidthExtraNm: Wiggle room allowed on fitted PSF FHWM. Ie fitted PSF width can be within range psfFWHM +/- psfWidthExtraNm. DEFAULT: 50
+%   'CytoplasmBG-FWHM', cytoBgFWHM_nm: Initial guess for the FWHM of the large gaussian fitted to account for the defocussed cytoplasmic background. DEFAULT:1300
+%   'CytoplasmBG-FWHM-min', cytoBgFWHMmin_nm: Minimum for the FWHM of the large gaussian fitted to account for the defocussed cytoplasmic background. DEFAULT:1000
+%   'CytoplasmBG-FWHM-max', cytoBgFWHMmax_nm: Maximum for the FWHM of the large gaussian fitted to account for the defocussed cytoplasmic background. DEFAULT:1000
+% NOTE: A second defocussed Gaussian is also fitted, with min width cytoBgFWHMmin_nm, and max width=Inf because a single gaussian does not fit well the cytoplasmic BG distribution.
+%   'RingRadius-max', radMax_nm: Maximum fitted ring radius. Default should hold well for WT or even most mutant Bsubtilis but change if in a different organism. If you set it too large the fitting becomes unstable for small rings. DEFAULT: 600
+%   'ZeroPadKymograph', doZeroPadKymo: Add a zero row as the last row of the kymograph so that ImageJ plotting defaults to the correct contrast. DEFAULT: true
+%   'FixedRadiusFit', doFixedRadiusFit: Fix the ring radius and position to the average ring position. Useful for cells that dont constrict within timeframe of imaging. If the cells constrict you need to turn this off. DEFAULT: true 
+%   'LineProfleWidth': LineWidth: perpendicular distance over which to integrate line profile signal to improve SNR. DEFAULT:pixSz , ie 1 pixel
+%   'NumKymoRepeats', nKymoWrap: Number of times to plot the kymograph side-by-side in the kymoWrap file. DEFAULT: 2
+%
+% OUTPUTS:
+%   Files, in subdirectory analysed:
+%       <filename>_bgsub.tif: Background subtracted ring 
+%       <filename>_kymo.tif: Kymograph
+%       <filename>_kymoWrap.tif: Kymograph, repeated nKymoWrap times
+%       <filename>_fitData.mat: Fit results
+%       <filename>_diamInfo.txt: Ring diameter, each frame
+
 f = dir(fileFilter);
 nF= numel(f);
 
@@ -21,7 +48,7 @@ global DEBUG_RING
 
 ringFitArg={};
 frStep = 1;
-lineProfileWidth = 65;
+lineProfileWidth = pixSz;
 psfFWHM = 300;
 bleachPlotOn=false;
 nKymoWrap=2;

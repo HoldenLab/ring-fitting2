@@ -1,4 +1,53 @@
-function [fitPar, fitIm,ringIm_noBg] = fitRing(im, pixSz_nm,psfFWHM, varargin)
+function [fitPar, fitIm,im_bgsub] = fitRing(im, pixSz_nm,psfFWHM, varargin)
+% function [fitPar, fitIm,im_bgsub] = fitRing(im, pixSz_nm,psfFWHM, varargin)
+%
+% Fit a ring to an image.
+% Blurred annulus (signal) , plus flat background plus two large width gaussians to account for diffuse and out of focus cytoplasmic background.
+% Hardcoded NSECTOR (currently 12) to allow varying amplitude
+% Model is:
+%    X0 = par(1);
+%    Y0 = par(2);
+%    R0 = par(3);
+%    stdRing = par(4);
+%    A = par(5);
+%    bg_flat = par(6);
+%    cytoplasmBg = par(7);
+%    cytoplasmBgWidth=par(8);
+%    cytoplasmBg2 = par(9);
+%    cytoplasmBgWidth2=par(10);
+%    sectorAmp(1:nSector) = par(11:11+nSector-1);
+%    for ii = 1:nSector
+%        F_ring(sectoredImage==ii) = sectorAmp(ii)*A.*exp(-(R(sectoredImage==ii)-R0).^2./(2.*stdRing.^2));
+%    end
+%    %flat background contribution
+%    F_bg = bg_flat;
+%    %defocussed gaussian cytoplasm contribution
+%    F_cyto = cytoplasmBg.*exp(-((X-X0).^2+(Y-Y0).^2)./(2.*cytoplasmBgWidth.^2));
+%    %Another defocussed gaussian cytoplasm contribution
+%    F_cyto2 = cytoplasmBg2.*exp(-((X-X0).^2+(Y-Y0).^2)./(2.*cytoplasmBgWidth2.^2));
+%    F=F_bg+F_ring+F_cyto+F_cyto2;
+%
+% INPUTS:
+%   im: ring Image
+%   pixSz: Camera pixel size in nanometres
+%   psfFWHM: Fitted PSF FWHM, nm. Determines PSF size used to blur the fitted ring. 
+%
+% OUTPUTS:
+%   fitPar: As defined above.
+%   fitIm: Fitted image
+%   im_bgsub: Input image, im, minus the fitted background.
+%       Ie im_bgsub = im - (F_bg + F_cyto + F_cyto2)
+%
+% OPTIONAL INPUTS:
+%   'PsfFWHM', psfFWHM: Fitted PSF FWHM, nm. Determines PSF size used to blur the fitted ring. DEFAULT: 300 nm
+%   'PsfWidthRangeNm',psfWidthExtraNm: Wiggle room allowed on fitted PSF FHWM. Ie fitted PSF width can be within range psfFWHM +/- psfWidthExtraNm. DEFAULT: 50
+%   'CytoplasmBG-FWHM', cytoBgFWHM_nm: Initial guess for the FWHM of the large gaussian fitted to account for the defocussed cytoplasmic background. DEFAULT:1300
+%   'CytoplasmBG-FWHM-min', cytoBgFWHMmin_nm: Minimum for the FWHM of the large gaussian fitted to account for the defocussed cytoplasmic background. DEFAULT:1000
+%   'CytoplasmBG-FWHM-max', cytoBgFWHMmax_nm: Maximum for the FWHM of the large gaussian fitted to account for the defocussed cytoplasmic background. DEFAULT:1000
+% NOTE: A second defocussed Gaussian is also fitted, with min width cytoBgFWHMmin_nm, and max width=Inf because a single gaussian does not fit well the cytoplasmic BG distribution.
+%   'RingRadius-max', radMax_nm: Maximum fitted ring radius. Default should hold well for WT or even most mutant Bsubtilis but change if in a different organism. If you set it too large the fitting becomes unstable for small rings. DEFAULT: 600
+%   'FixedRadiusFit', fitParAvg: Fix the ring radius and position to the average ring position. Useful for cells that dont constrict within timeframe of imaging. If the cells constrict you need to turn this off. FITPARAVG is the result of a prior fit to an averaged ring, used to fix the positions. DEFAULT: true
+
 global DEBUG_RING
 %parameters: x0, y0, r,width, Amplitude, BG, cytoplasmBg
 NSECTOR=12;
@@ -97,7 +146,7 @@ fitIm = ringAndGaussBG(fitPar,imSz,NSECTOR);
 bgPar = fitPar;
 bgPar(5) = 0; %set the ring amp to 0
 bgIm = ringAndGaussBG(bgPar,imSz,NSECTOR);
-ringIm_noBg = im - bgIm;
+im_bgsub = im - bgIm;
 ringPar = fitPar;
 ringPar(7) = 0;
 ringPar(9) = 0;
