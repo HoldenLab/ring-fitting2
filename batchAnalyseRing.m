@@ -66,7 +66,7 @@ while ii<=numel(varargin)
     elseif strcmp(varargin{ii},'PsfFWHM')
         psfFWHM=varargin{ii+1};
         ii=ii+2;
-    elseif strcmp(varargin{ii},'LineProfleWidth')
+    elseif strcmp(varargin{ii},'LineProfileWidth')
         lineProfileWidth=varargin{ii+1};
         ii=ii+2;
     elseif strcmp(varargin{ii},'NumKymoRepeats')
