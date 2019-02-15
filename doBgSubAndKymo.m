@@ -138,7 +138,7 @@ for ii = 1:nPt
     Xline = [repmat(XC',1,numel(dL)) + dXnorm'*dL]';
     %%interpolate the intensity to sub-pixel precision
     lineProfile = interp2(Xim,Yim,I,Xline(:,1),Xline(:,2),'cubic');
-    profileIntensityWide(ii) =mean(lineProfile);
+    profileIntensityWide(ii) =trapz(dL,lineProfile);
     profileIntensity1pix(ii) = interp2(Xim,Yim,I,x(ii),y(ii),'cubic');
 end
 
