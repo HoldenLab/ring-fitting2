@@ -29,6 +29,15 @@ function batchAnalyseRing(fileFilter,pixSz,varargin)
 %       <filename>_kymoWrap.tif: Kymograph, repeated nKymoWrap times
 %       <filename>_fitData.mat: Fit results
 %       <filename>_diamInfo.txt: Ring diameter, each frame
+%
+% EXAMPLES:
+%   
+%   By default, fits with fixed radius based on average image
+%   >> batchAnalyseRing('*.tif',pixSz)
+%   Alternatively, fit with a free radius to allow for constriction
+%   >> batchAnalyseRing('*.tif',pixSz,'FixedRadiusFit',false)
+%   Optionally you can save the non-background subtracted kymograph
+%   >> batchAnalyseRing('*.tif',pixSz,`'SaveRawKymograph',true)
 
 f = dir(fileFilter);
 nF= numel(f);
