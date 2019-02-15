@@ -10,3 +10,5 @@ doBgSubAndKymo.m: Background subtract and plot kymogrpaphs for a single ring mov
 fitRing.m: Fit a single ring image to a blurred ring + background model. See documentation in the file.              
 
 testing\ :  Various ring movie files and test scripts.
+
+INSTALLATION: Add the 'ring-fitting2' directory to your MATLAB path, and save the updated path  so that it will remain installed next time you start MATLAB.
