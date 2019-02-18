@@ -12,3 +12,5 @@ fitRing.m: Fit a single ring image to a blurred ring + background model. See doc
 testing\ :  Various ring movie files and test scripts.
 
 INSTALLATION: Add the 'ring-fitting2' directory to your MATLAB path, and save the updated path  so that it will remain installed next time you start MATLAB.
+
+
