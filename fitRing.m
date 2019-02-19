@@ -59,6 +59,8 @@ cytoBgFWHMmax_nm = 2000;
 radMax_nm=600;
 psfWidthExtraNm= 50;%as in +/- psfFWHM
 doFixedRadiusFit=false;
+doSetRadius=false;
+radiusManual=NaN;
 nargin = numel(varargin);
 ii = 1;
 while ii<=numel(varargin)
@@ -83,6 +85,10 @@ while ii<=numel(varargin)
     elseif strcmp(varargin{ii},'FixedRadiusFit') %best to set this pretty close to the max plausible ring radius
         doFixedRadiusFit = true;
         fitParAvg= varargin{ii+1};
+        ii=ii+2;
+    elseif strcmp(varargin{ii},'Radius') %supply a manually chosen radius
+        doSetRadius= true;
+        radiusManual= varargin{ii+1};
         ii=ii+2;
     else
         ii=ii+1;
@@ -134,6 +140,12 @@ else
     wMax = width0+psfWidthExtraNm/2.35/pixSz_nm;
     lb =[-inf, -inf,0,wMin,0,0,0,cytoBgWidthMin,0,cytoBgWidthMin,zeros(size(sectorAmp0))];
     ub = [inf,inf,radMax,wMax,inf,inf,inf,cytoBgWidthMax,inf,inf,ones(size(sectorAmp0))];%the second blurred bg can be as big as you like
+    if doSetRadius %this just manually fixes the radius
+        radiusManualPix = radiusManual/pixSz_nm;
+        initGuess(3) = radiusManualPix;
+        lb(3) = radiusManualPix;
+        ub(3) = radiusManualPix;
+    end
 end
 
 if DEBUG_RING
