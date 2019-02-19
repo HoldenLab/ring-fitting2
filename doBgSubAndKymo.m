@@ -4,7 +4,6 @@ function [ ringStack_noBg, ringKymograph, circleData, kymoInfo, rawKymograph] = 
 %use fitting to the ring to find the diameter, should make it more robust eg on small rings
 %   Performs background subtraction and kymograph fitting for vertically immobilized cells
 %   Kymographs are background subtracted ie zero should equal a genuine gap in the ring
-%   TODO: Optional plotting of the raw (non-bg subtracted kymograph)
 % INPUTS:
 %   ringStack: [y,x,frame] ring dynamics movie 
 %   pixSz: Camera pixel size in nanometres

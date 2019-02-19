@@ -2,7 +2,6 @@ function batchAnalyseRing(fileFilter,pixSz,varargin)
 % function batchAnalyseRing(fileFilter,pixSz,varargin)
 %   Performs background subtraction and kymograph fitting for vertically immobilized cells
 %   Kymographs are background subtracted ie zero should equal a genuine gap in the ring
-%   TODO: Optional plotting of the raw (non-bg subtracted kymograph)
 % INPUTS:
 %   fileFilter: Search string for files to analyse, eg '*.tif'
 %   pixSz: Camera pixel size in nanometres
