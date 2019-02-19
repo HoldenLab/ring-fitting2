@@ -19,6 +19,7 @@ function batchAnalyseRing(fileFilter,pixSz,varargin)
 %   'LineProfleWidth': LineWidth: perpendicular distance over which to integrate line profile signal to improve SNR. DEFAULT:pixSz , ie 1 pixel
 %   'NumKymoRepeats', nKymoWrap: Number of times to plot the kymograph side-by-side in the kymoWrap file. DEFAULT: 2
 %   'SaveRawKymograph', doSaveRawKymograph: Save a non-background subtracted kymograph as well. DEFAULT, false
+% TODO: Add fixed radius free position option for cytoplasmic GFP experiment
 %
 % NOTE: If the background subtration fails for some frames - slow fitting, bright bands in the kymographs - this is usually because 'FixedRadiusFit' is set to true, but the radius is changing  - try changing 'FixedRadiusFit' to false. If the radius is changign the FixedRadiusFit gives bad results as the average radius is not a good match for all frames
 %
