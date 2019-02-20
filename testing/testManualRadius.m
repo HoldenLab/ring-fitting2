@@ -1,5 +1,5 @@
 %TEST for manual radius setting
-fname = '190214_1mW_vert_1_MMStack_Pos0.ome_denoise_reg_ring1.tif'
+fname = '190214_1mW_vert_1_MMStack_Pos0.ome_denoise_reg_ring2.tif'
 
 pixSz = 65; % [nm]
 psfFWHM = 300; % [nm]Check with beads

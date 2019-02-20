@@ -127,7 +127,8 @@ amplitude0 = max(fg(:));
 bg0=mean(im(otsuThresh==1));
 cytoplasmBg0 = max(im(:));
 cytoplasmBg2_0 = mean(im(:));
-cytoBgWidth2_0 =cytoBgWidth;
+%cytoBgWidth2_0 =cytoBgWidth;
+cytoBgWidth2_0 = imSz(1)/2;
 sectorAmp0(1:NSECTOR) = 1;
 
 
