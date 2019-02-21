@@ -78,9 +78,6 @@ while ii<=numel(varargin)
     elseif strcmp(varargin{ii},'CytoplasmBG-FWHM-min')
         cytoBgFWHMmin_nm = varargin{ii+1};
         ii=ii+2;
-    elseif strcmp(varargin{ii},'CytoplasmBG-FWHM-max')
-        cytoBgFWHMmax_nm = varargin{ii+1};
-        ii=ii+2;
     elseif strcmp(varargin{ii},'RingRadius-max') %best to set this pretty close to the max plausible ring radius
         radMax_nm= varargin{ii+1};
         ii=ii+2;
