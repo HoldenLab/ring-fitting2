@@ -62,7 +62,8 @@ doFixedRadiusFit=false;
 doSetRadius=false;
 doCytoOnlyFit=false;
 radiusManual=NaN;
-cytoFitModel = 'Gauss';
+cytoFitModel = 'Gauss+Cauchy';
+doShowFitResult = false;
 nargin = numel(varargin);
 ii = 1;
 while ii<=numel(varargin)
@@ -95,6 +96,9 @@ while ii<=numel(varargin)
     elseif strcmp(varargin{ii},'CytoFitModel') %force the ring amplitude to zero for cyto only fit
         % 'Gauss','Cauchy','Parametric'
         cytoFitModel= varargin{ii+1};
+        ii=ii+2;
+    elseif strcmp(varargin{ii},'ShowFitOutcome') %force the ring amplitude to zero for cyto only fit
+        doShowFitResult= varargin{ii+1};
         ii=ii+2;
     else
         ii=ii+1;
@@ -187,13 +191,11 @@ else
     end
 end
 
-if DEBUG_RING
+if doShowFitResult 
     opt = optimoptions(@lsqcurvefit,'Display','final');
 else
     opt = optimoptions(@lsqcurvefit,'Display','off');
 end
-%TEMP
-opt = optimoptions(@lsqcurvefit,'Display','final');
 
 [fitPar] = lsqcurvefit(@(x, xdata)  ringAndGaussBG(x, xdata,NSECTOR,cytoFitModel), ...
                          initGuess ,imSz,im, lb,ub,opt); 

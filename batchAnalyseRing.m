@@ -72,7 +72,8 @@ while ii<=numel(varargin)
         || strcmp(varargin{ii},'CytoplasmBG-FWHM-min') || strcmp(varargin{ii},'CytoplasmBG-FWHM-max') ...
         || strcmp(varargin{ii},'RingRadius-max') || strcmp(varargin{ii},'ZeroPadKymograph')...
         || strcmp(varargin{ii},'FixedRadiusFit') || strcmp(varargin{ii},'Radius') ...
-        || strcmp(varargin{ii},'CytoplasmOnlyFit')|| strcmp(varargin{ii},'PlotFit')
+        || strcmp(varargin{ii},'CytoplasmOnlyFit')|| strcmp(varargin{ii},'PlotFit')...
+        || strcmp(varargin{ii},'ShowFitOutcome') 
         ringFitArg={ringFitArg{:},varargin{ii:ii+1}};
         ii=ii+1;
     elseif strcmp(varargin{ii},'PsfFWHM')
@@ -110,10 +111,10 @@ ringStack = imreadstack(fname);
 
 % calculate the kymograph
 [ ringStack_noBg,kymo,circFit,kymoInfo, kymoraw] = doBgSubAndKymo(ringStack,pixSz,lineProfileWidth,psfFWHM,ringFitArg{:});
-save([savepath,filesep,fname(1:end-4),'_fitData.mat'],'circFit','kymoInfo');
+save([savepath,filesep,name,'_fitData.mat'],'circFit','kymoInfo');
 %write a text file with the radius for quick reference
 diamNm = round(kymoInfo(:,3))*2;
-radius_fname = [savepath,filesep,fname(1:end-4),'_diamInfo','.txt'];
+radius_fname = [savepath,filesep,name,'_diamInfo','.txt'];
 dlmwrite(radius_fname,diamNm);
 
 %make 2pi versions of everything for convenience
@@ -121,11 +122,11 @@ kymo_wrap = repmat(kymo,[1,nKymoWrap]);
 kymoraw_wrap = repmat(kymoraw,[1,nKymoWrap]);
 
 %save everything as floats if that's what's returned
-tiffwrite([savepath,filesep,fname(1:end-4),'_bgsub.tif'],ringStack_noBg);
-tiffwrite([savepath,filesep,fname(1:end-4),'_kymo.tif'],kymo);
-tiffwrite([savepath,filesep,fname(1:end-4),'_kymoWrap.tif'],kymo_wrap);
+tiffwrite([savepath,filesep,name,'_bgsub.tif'],ringStack_noBg);
+tiffwrite([savepath,filesep,name,'_kymo.tif'],kymo);
+tiffwrite([savepath,filesep,name,'_kymoWrap.tif'],kymo_wrap);
 if doSaveRawKymograph
-    tiffwrite([savepath,filesep,fname(1:end-4),'_kymoRaw.tif'],kymoraw);
-    tiffwrite([savepath,filesep,fname(1:end-4),'_kymoRawWrap.tif'],kymoraw_wrap);
+    tiffwrite([savepath,filesep,name,'_kymoRaw.tif'],kymoraw);
+    tiffwrite([savepath,filesep,name,'_kymoRawWrap.tif'],kymoraw_wrap);
 end
 
