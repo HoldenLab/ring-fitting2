@@ -55,13 +55,14 @@ NSECTOR=12;
 plotOn=false;
 cytoBgFWHM_nm = 1300;
 cytoBgFWHMmin_nm = 1000;
-cytoBgFWHMmax_nm = 2000;
+cytoBgFWHMmax_nm = Inf;
 radMax_nm=600;
 psfWidthExtraNm= 50;%as in +/- psfFWHM
 doFixedRadiusFit=false;
 doSetRadius=false;
 doCytoOnlyFit=false;
 radiusManual=NaN;
+cytoFitModel = 'Gauss';
 nargin = numel(varargin);
 ii = 1;
 while ii<=numel(varargin)
@@ -94,6 +95,10 @@ while ii<=numel(varargin)
     elseif strcmp(varargin{ii},'CytoplasmOnlyFit') %force the ring amplitude to zero for cyto only fit
         doCytoOnlyFit= varargin{ii+1};
         ii=ii+2;
+    elseif strcmp(varargin{ii},'CytoFitModel') %force the ring amplitude to zero for cyto only fit
+        % 'Gauss','Cauchy','Parametric'
+        cytoFitModel= varargin{ii+1};
+        ii=ii+2;
     else
         ii=ii+1;
     end
@@ -117,10 +122,16 @@ fg(BW==0)=0;
 imSz = size(im);
 
 radMax = radMax_nm/pixSz_nm;%Like mad max
-cytoBgWidth = cytoBgFWHM_nm/2.35/pixSz_nm;%manually estimated cytoplasmic gaussian contribution
-cytoBgWidthMin=cytoBgFWHMmin_nm/2.35/pixSz_nm;
-cytoBgWidthMax=cytoBgFWHMmax_nm/2.35/pixSz_nm;
 width0 = psfFWHM/2.35/pixSz_nm;
+if strcmp(cytoFitModel,'Gauss') %Gauss, FWHM = 2.35*w
+    cytoBgWidth = cytoBgFWHM_nm/2.35/pixSz_nm;%manually estimated cytoplasmic gaussian contribution
+    cytoBgWidthMin=cytoBgFWHMmin_nm/2.35/pixSz_nm;
+    cytoBgWidthMax=cytoBgFWHMmax_nm/2.35/pixSz_nm;
+else %cauchy distribution FWHM = 2*w
+    cytoBgWidth = cytoBgFWHM_nm/2/pixSz_nm;%manually estimated cytoplasmic gaussian contribution
+    cytoBgWidthMin=cytoBgFWHMmin_nm/2/pixSz_nm;
+    cytoBgWidthMax=cytoBgFWHMmax_nm/2/pixSz_nm;
+end
 
 r0 = min(radGuess(fg),radMax);
 amplitude0 = max(fg(:));
@@ -164,19 +175,19 @@ else
     opt = optimoptions(@lsqcurvefit,'Display','off');
 end
 
-[fitPar] = lsqcurvefit(@(x, xdata)  ringAndGaussBG(x, xdata,NSECTOR), ...
+[fitPar] = lsqcurvefit(@(x, xdata)  ringAndGaussBG(x, xdata,NSECTOR,cytoFitModel), ...
                          initGuess ,imSz,im, lb,ub,opt); 
 
-fitIm = ringAndGaussBG(fitPar,imSz,NSECTOR);
+fitIm = ringAndGaussBG(fitPar,imSz,NSECTOR,cytoFitModel);
 bgPar = fitPar;
 bgPar(5) = 0; %set the ring amp to 0
-bgIm = ringAndGaussBG(bgPar,imSz,NSECTOR);
+bgIm = ringAndGaussBG(bgPar,imSz,NSECTOR,cytoFitModel);
 im_bgsub = im - bgIm;
 ringPar = fitPar;
 ringPar(7) = 0;
 ringPar(9) = 0;
 ringPar(6)=0;
-ringIm = ringAndGaussBG(ringPar,imSz,NSECTOR);
+ringIm = ringAndGaussBG(ringPar,imSz,NSECTOR,cytoFitModel);
 
 
 if plotOn || (~isempty(DEBUG_RING) && DEBUG_RING==true)
@@ -291,7 +302,7 @@ Yring = Y(fg>0);
 x0 = mean(Xring);
 y0 = mean(Yring);
 %------------------------------------------
-function F= ringAndGaussBG(par,imSz,nSector)
+function F= ringAndGaussBG(par,imSz,nSector,cytoFitModel)
 %parameters: x0, y0, r,widthRing, AmplitudeRing, bg_flat, cytoplasmBgWidth
 
  % Create a logical image of a ring with specified
@@ -337,12 +348,23 @@ for ii = 1:nSector
 end
 %flat background contribution
 F_bg = bg_flat;
-%defocussed gaussian cytoplasm contribution
-F_cyto = cytoplasmBg.*exp(-((X-X0).^2+(Y-Y0).^2)./(2.*cytoplasmBgWidth.^2));
+%defocussed cytoplasm contribution
+if strcmp(cytoFitModel,'Gauss')
+    F_cyto = cytoplasmBg.*exp(-((X-X0).^2+(Y-Y0).^2)./(2.*cytoplasmBgWidth.^2));
+%DISABLE SECOND GAUSSIAN FOR NOW
 %Another defocussed gaussian cytoplasm contribution
-%Epicycles??
-F_cyto2 = cytoplasmBg2.*exp(-((X-X0).^2+(Y-Y0).^2)./(2.*cytoplasmBgWidth2.^2));
+%F_cyto2 = cytoplasmBg2.*exp(-((X-X0).^2+(Y-Y0).^2)./(2.*cytoplasmBgWidth2.^2));
+elseif strcmp(cytoFitModel,'Cauchy')
+    %simple extension from 1d defined in kim et al 2013
+    %Resolution recovery reconstruction for a Compton camera
+    % using transform r^2 = x^2+y^2
+    F_cyto = cytoplasmBg.*(cytoplasmBgWidth.^2./((X-X0).^2+(Y-Y0).^2+cytoplasmBgWidth.^2));
 
-F=F_bg+F_ring+F_cyto+F_cyto2;
+elseif strcmp(cytoFitModel,'Parametric')
+end
+
+
+%F=F_bg+F_ring+F_cyto+F_cyto2;
+F=F_bg+F_ring+F_cyto;
 
 
