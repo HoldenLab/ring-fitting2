@@ -149,8 +149,8 @@ sectorAmp0(1:NSECTOR) = 1;
 if doFixedRadiusFit
     initGuess = fitParAvg;
     initGuess(11:11+NSECTOR-1)=ones(size(sectorAmp0));%reset the sector model
-    lb = [-inf,-inf, fitParAvg(3), fitParAvg(4),0,0,0,fitParAvg(8),cytoBg2min, fitParAvg(11),zeros(size(sectorAmp0))];
-    ub = [inf,inf, fitParAvg(3), fitParAvg(4),inf,inf,inf,fitParAvg(8),cytoBg2max, fitParAvg(11),ones(size(sectorAmp0))];
+    lb = [-inf,-inf, fitParAvg(3), fitParAvg(4),0,0,0,fitParAvg(8),cytoBg2min, fitParAvg(10),zeros(size(sectorAmp0))];
+    ub = [inf,inf, fitParAvg(3), fitParAvg(4),inf,inf,inf,fitParAvg(8),cytoBg2max, fitParAvg(10),ones(size(sectorAmp0))];
 else
     initGuess = [x0,y0,r0,width0,amplitude0,bg0,cytoplasmBg0,cytoBgWidth,cytoBg2_0 ,cytoBgWidth2_0,sectorAmp0];
     wMin = width0-psfWidthExtraNm/2.35/pixSz_nm;
