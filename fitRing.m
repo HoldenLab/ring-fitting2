@@ -133,14 +133,14 @@ end
 %parameters for the parametric fit
 cytoGamma0 = 1;
 cytoGammaMin = 1;
-if strcmp(cytoFitModel,'Parametric') 
+if strcmp(cytoFitModel,'Parametric') || strcmp(cytoFitModel,'Gauss+Parametric')
     cytoGammaMax = Inf;
 else
     cytoGammaMax = 1;
 end
 
 %parameters for the mixed fit
-if strcmp(cytoFitModel,'Gauss-Cauchy') 
+if strcmp(cytoFitModel,'Gauss+Cauchy') || strcmp(cytoFitModel,'Gauss+Parametric')
     cytoBg2_0 = max(im(:));
     cytoBgWidth2_0 =cytoBgWidth;
     cytoBg2min = 0;
@@ -379,9 +379,13 @@ elseif strcmp(cytoFitModel,'Cauchy')
     F_cyto = cytoBg.*(cytoBgWidth.^2./((X-X0).^2+(Y-Y0).^2+cytoBgWidth.^2));
 elseif strcmp(cytoFitModel,'Parametric')
     F_cyto = cytoBg.*(1+ ((X-X0).^2+(Y-Y0).^2)./(cytoGamma.*cytoBgWidth.^2)).^(-cytoGamma);
-elseif strcmp(cytoFitModel,'Gauss-Cauchy')
+elseif strcmp(cytoFitModel,'Gauss+Cauchy')
     F_cytoG = cytoBg.*exp(-((X-X0).^2+(Y-Y0).^2)./(2.*cytoBgWidth.^2));
     F_cytoC = cytoBg2.*(cytoBgWidth2.^2./((X-X0).^2+(Y-Y0).^2+cytoBgWidth2.^2));
+    F_cyto = F_cytoG+F_cytoC;
+elseif strcmp(cytoFitModel,'Gauss+Parametric')
+    F_cytoG = cytoBg.*exp(-((X-X0).^2+(Y-Y0).^2)./(2.*cytoBgWidth.^2));
+    F_cytoC = cytoBg2.*(1+ ((X-X0).^2+(Y-Y0).^2)./(cytoGamma.*cytoBgWidth2.^2)).^(-cytoGamma);
     F_cyto = F_cytoG+F_cytoC;
 end
 
