@@ -20,7 +20,6 @@ function [ ringStack_noBg, ringKymograph, circleData, kymoInfo, rawKymograph, fi
 %   'ZeroPadKymograph', doZeroPadKymo: Add a zero row as the last row of the kymograph so that ImageJ plotting defaults to the correct contrast. DEFAULT: true
 %   'FixedRadiusFit', doFixedRadiusFit: Fix the ring radius and position to the average ring position. Useful for cells that dont constrict within timeframe of imaging. If the cells constrict you need to turn this off. DEFAULT: true 
 % NOTE: If the background subtration fails for some frames - slow fitting, bright bands in the kymographs - this is usually because 'FixedRadiusFit' is set to true, but the radius is changing  - try changing 'FixedRadiusFit' to false. If the radius is changign the FixedRadiusFit gives bad results as the average radius is not a good match for all frames
-%TODO:save fit par
 
 nargin = numel(varargin);
 fitRingArg={};

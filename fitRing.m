@@ -62,7 +62,6 @@ doFixedRadiusFit=false;
 doSetRadius=false;
 doCytoOnlyFit=false;
 radiusManual=NaN;
-cytoFitModel = 'Gauss+Cauchy';
 doShowFitResult = false;
 nargin = numel(varargin);
 usePriorInitGuess=false;
@@ -95,10 +94,6 @@ while ii<=numel(varargin)
     elseif strcmp(varargin{ii},'CytoplasmOnlyFit') %force the ring amplitude to zero for cyto only fit
         doCytoOnlyFit= varargin{ii+1};
         ii=ii+2;
-    elseif strcmp(varargin{ii},'cytofitmodel') %force the ring amplitude to zero for cyto only fit
-        % 'gauss','cauchy','parametric'
-        cytofitmodel= varargin{ii+1};
-        ii=ii+2;
     elseif strcmp(varargin{ii},'ShowFitOutcome') %force the ring amplitude to zero for cyto only fit
         doShowFitResult= varargin{ii+1};
         ii=ii+2;
@@ -130,42 +125,19 @@ imSz = size(im);
 
 radMax = radMax_nm/pixSz_nm;%Like mad max
 width0 = psfFWHM/2.35/pixSz_nm;
-if strcmp(cytoFitModel,'Gauss') || strcmp(cytoFitModel,'Gauss+Cauchy') || strcmp(cytoFitModel,'Gauss+Parametric')
-    %Gauss, FWHM = 2.35*w
-    cytoBgWidth = cytoBgFWHM_nm/2.35/pixSz_nm;%manually estimated cytoplasmic gaussian contribution
-    cytoBgWidthMin=cytoBgFWHMmin_nm/2.35/pixSz_nm;
-    cytoBgWidthMax=cytoBgFWHMmax_nm/2.35/pixSz_nm;
-else %cauchy distribution FWHM = 2*w
-    cytoBgWidth = cytoBgFWHM_nm/2/pixSz_nm;%manually estimated cytoplasmic gaussian contribution
-    cytoBgWidthMin=cytoBgFWHMmin_nm/2/pixSz_nm;
-    cytoBgWidthMax=cytoBgFWHMmax_nm/2/pixSz_nm;
-end
+%Gauss, FWHM = 2.35*w
+cytoBgWidth = cytoBgFWHM_nm/2.35/pixSz_nm;%manually estimated cytoplasmic gaussian contribution
+cytoBgWidthMin=cytoBgFWHMmin_nm/2.35/pixSz_nm;
+cytoBgWidthMax=cytoBgFWHMmax_nm/2.35/pixSz_nm;
 
-%parameters for the parametric fit
-cytoGamma0 = 1;
-cytoGammaMin = 1;
-if strcmp(cytoFitModel,'Parametric') || strcmp(cytoFitModel,'Gauss+Parametric')
-    cytoGammaMax = Inf;
-else
-    cytoGammaMax = 1;
-end
 
 %parameters for the mixed fit
-if strcmp(cytoFitModel,'Gauss+Cauchy') || strcmp(cytoFitModel,'Gauss+Parametric')
-    cytoBg2_0 = max(im(:));
-    cytoBgWidth2_0 =cytoBgWidth;
-    cytoBg2min = 0;
-    cytoBg2max = inf;
-    cytoBgWidth2min = cytoBgWidthMin;
-    cytoBgWidth2max = inf;
-else
-    cytoBg2_0 = 0;
-    cytoBgWidth2_0 =0;
-    cytoBg2min = 0;
-    cytoBg2max =0;
-    cytoBgWidth2min = 0;
-    cytoBgWidth2max = 0;
-end
+cytoBg2_0 = max(im(:));
+cytoBgWidth2_0 =cytoBgWidth;
+cytoBg2min = 0;
+cytoBg2max = inf;
+cytoBgWidth2min = cytoBgWidthMin;
+cytoBgWidth2max = inf;
 
 r0 = min(radGuess(fg),radMax);
 amplitude0 = max(fg(:));
@@ -177,14 +149,14 @@ sectorAmp0(1:NSECTOR) = 1;
 if doFixedRadiusFit
     initGuess = fitParAvg;
     initGuess(11:11+NSECTOR-1)=ones(size(sectorAmp0));%reset the sector model
-    lb = [-inf,-inf, fitParAvg(3), fitParAvg(4),0,0,0,fitParAvg(8),fitParAvg(9),cytoBg2min, fitParAvg(11),zeros(size(sectorAmp0))];
-    ub = [inf,inf, fitParAvg(3), fitParAvg(4),inf,inf,inf,fitParAvg(8),fitParAvg(9),cytoBg2max, fitParAvg(11),ones(size(sectorAmp0))];
+    lb = [-inf,-inf, fitParAvg(3), fitParAvg(4),0,0,0,fitParAvg(8),cytoBg2min, fitParAvg(11),zeros(size(sectorAmp0))];
+    ub = [inf,inf, fitParAvg(3), fitParAvg(4),inf,inf,inf,fitParAvg(8),cytoBg2max, fitParAvg(11),ones(size(sectorAmp0))];
 else
-    initGuess = [x0,y0,r0,width0,amplitude0,bg0,cytoplasmBg0,cytoBgWidth,cytoGamma0,cytoBg2_0 ,cytoBgWidth2_0,sectorAmp0];
+    initGuess = [x0,y0,r0,width0,amplitude0,bg0,cytoplasmBg0,cytoBgWidth,cytoBg2_0 ,cytoBgWidth2_0,sectorAmp0];
     wMin = width0-psfWidthExtraNm/2.35/pixSz_nm;
     wMax = width0+psfWidthExtraNm/2.35/pixSz_nm;
-    lb =[-inf, -inf,0,wMin,0,0,0,cytoBgWidthMin,cytoGammaMin,cytoBg2min,cytoBgWidth2min,zeros(size(sectorAmp0))];
-    ub = [inf,inf,radMax,wMax,inf,inf,inf,cytoBgWidthMax,cytoGammaMax,cytoBg2max,cytoBgWidth2max,ones(size(sectorAmp0))];
+    lb =[-inf, -inf,0,wMin,0,0,0,cytoBgWidthMin,cytoBg2min,cytoBgWidth2min,zeros(size(sectorAmp0))];
+    ub = [inf,inf,radMax,wMax,inf,inf,inf,cytoBgWidthMax,cytoBg2max,cytoBgWidth2max,ones(size(sectorAmp0))];
     if doSetRadius
         radiusManualPix = radiusManual/pixSz_nm;
         initGuess(3) = radiusManualPix;
@@ -208,19 +180,19 @@ else
     opt = optimoptions(@lsqcurvefit,'Display','off');
 end
 
-[fitPar] = lsqcurvefit(@(x, xdata)  ringAndGaussBG(x, xdata,NSECTOR,cytoFitModel), ...
+[fitPar] = lsqcurvefit(@(x, xdata)  ringAndGaussBG(x, xdata,NSECTOR), ...
                          initGuess ,imSz,im, lb,ub,opt); 
 
-fitIm = ringAndGaussBG(fitPar,imSz,NSECTOR,cytoFitModel);
+fitIm = ringAndGaussBG(fitPar,imSz,NSECTOR);
 bgPar = fitPar;
 bgPar(5) = 0; %set the ring amp to 0
-bgIm = ringAndGaussBG(bgPar,imSz,NSECTOR,cytoFitModel);
+bgIm = ringAndGaussBG(bgPar,imSz,NSECTOR);
 im_bgsub = im - bgIm;
 ringPar = fitPar;
 ringPar(7) = 0;
 ringPar(9) = 0;
 ringPar(6)=0;
-ringIm = ringAndGaussBG(ringPar,imSz,NSECTOR,cytoFitModel);
+ringIm = ringAndGaussBG(ringPar,imSz,NSECTOR);
 
 
 if plotOn || (~isempty(DEBUG_RING) && DEBUG_RING==true)
@@ -335,7 +307,7 @@ Yring = Y(fg>0);
 x0 = mean(Xring);
 y0 = mean(Yring);
 %------------------------------------------
-function F= ringAndGaussBG(par,imSz,nSector,cytoFitModel)
+function F= ringAndGaussBG(par,imSz,nSector)
 %parameters: x0, y0, r,widthRing, AmplitudeRing, bg_flat, cytoplasmBgWidth
 
  % Create a logical image of a ring with specified
@@ -352,10 +324,9 @@ A = par(5);
 bg_flat = par(6);
 cytoBg = par(7);
 cytoBgWidth=par(8);
-cytoGamma=par(9);
-cytoBg2 = par(10);
-cytoBgWidth2=par(11);
-sectorAmp(1:nSector) = par(12:12+nSector-1);
+cytoBg2 = par(9);
+cytoBgWidth2=par(10);
+sectorAmp(1:nSector) = par(11:11+nSector-1);
 
 [X, Y] = meshgrid(1:imageSizeX, 1:imageSizeY);
 
@@ -383,24 +354,14 @@ end
 %flat background contribution
 F_bg = bg_flat;
 %defocussed cyto contribution
-if strcmp(cytoFitModel,'Gauss')
-    F_cyto = cytoBg.*exp(-((X-X0).^2+(Y-Y0).^2)./(2.*cytoBgWidth.^2));
-elseif strcmp(cytoFitModel,'Cauchy')
-    %simple extension from 1d defined in kim et al 2013
-    %Resolution recovery reconstruction for a Compton camera
-    % using transform r^2 = x^2+y^2
-    F_cyto = cytoBg.*(cytoBgWidth.^2./((X-X0).^2+(Y-Y0).^2+cytoBgWidth.^2));
-elseif strcmp(cytoFitModel,'Parametric')
-    F_cyto = cytoBg.*(1+ ((X-X0).^2+(Y-Y0).^2)./(cytoGamma.*cytoBgWidth.^2)).^(-cytoGamma);
-elseif strcmp(cytoFitModel,'Gauss+Cauchy')
-    F_cytoG = cytoBg.*exp(-((X-X0).^2+(Y-Y0).^2)./(2.*cytoBgWidth.^2));
-    F_cytoC = cytoBg2.*(cytoBgWidth2.^2./((X-X0).^2+(Y-Y0).^2+cytoBgWidth2.^2));
-    F_cyto = F_cytoG+F_cytoC;
-elseif strcmp(cytoFitModel,'Gauss+Parametric')
-    F_cytoG = cytoBg.*exp(-((X-X0).^2+(Y-Y0).^2)./(2.*cytoBgWidth.^2));
-    F_cytoC = cytoBg2.*(1+ ((X-X0).^2+(Y-Y0).^2)./(cytoGamma.*cytoBgWidth2.^2)).^(-cytoGamma);
-    F_cyto = F_cytoG+F_cytoC;
-end
+% Gauss + Cauchy background
+% cauchy function defined as 
+%simple extension from 1d defined in kim et al 2013
+%'Resolution recovery reconstruction for a Compton camera'
+% using transform r^2 = x^2+y^2
+F_cytoG = cytoBg.*exp(-((X-X0).^2+(Y-Y0).^2)./(2.*cytoBgWidth.^2));
+F_cytoC = cytoBg2.*(cytoBgWidth2.^2./((X-X0).^2+(Y-Y0).^2+cytoBgWidth2.^2));
+F_cyto = F_cytoG+F_cytoC;
 
 F=F_bg+F_ring+F_cyto;
 
