@@ -54,7 +54,7 @@ NSECTOR=12;
 
 plotOn=false;
 cytoBgFWHM_nm = 1300;
-cytoBgFWHMmin_nm = 1000;
+cytoBgFWHMmin_nm = 800;
 cytoBgFWHMmax_nm = Inf;
 radMax_nm=600;
 psfWidthExtraNm= 50;%as in +/- psfFWHM
@@ -65,6 +65,8 @@ radiusManual=NaN;
 cytoFitModel = 'Gauss+Cauchy';
 doShowFitResult = false;
 nargin = numel(varargin);
+usePriorInitGuess=false;
+priorInitGuess = [];
 ii = 1;
 while ii<=numel(varargin)
     if strcmp(varargin{ii},'PsfWidthRangeNm')
@@ -93,12 +95,16 @@ while ii<=numel(varargin)
     elseif strcmp(varargin{ii},'CytoplasmOnlyFit') %force the ring amplitude to zero for cyto only fit
         doCytoOnlyFit= varargin{ii+1};
         ii=ii+2;
-    elseif strcmp(varargin{ii},'CytoFitModel') %force the ring amplitude to zero for cyto only fit
-        % 'Gauss','Cauchy','Parametric'
-        cytoFitModel= varargin{ii+1};
+    elseif strcmp(varargin{ii},'cytofitmodel') %force the ring amplitude to zero for cyto only fit
+        % 'gauss','cauchy','parametric'
+        cytofitmodel= varargin{ii+1};
         ii=ii+2;
     elseif strcmp(varargin{ii},'ShowFitOutcome') %force the ring amplitude to zero for cyto only fit
         doShowFitResult= varargin{ii+1};
+        ii=ii+2;
+    elseif strcmp(varargin{ii},'InitialGuess')
+        usePriorInitGuess=true;
+        priorInitGuess= varargin{ii+1};
         ii=ii+2;
     else
         ii=ii+1;
@@ -124,7 +130,8 @@ imSz = size(im);
 
 radMax = radMax_nm/pixSz_nm;%Like mad max
 width0 = psfFWHM/2.35/pixSz_nm;
-if strcmp(cytoFitModel,'Gauss') %Gauss, FWHM = 2.35*w
+if strcmp(cytoFitModel,'Gauss') || strcmp(cytoFitModel,'Gauss+Cauchy') || strcmp(cytoFitModel,'Gauss+Parametric')
+    %Gauss, FWHM = 2.35*w
     cytoBgWidth = cytoBgFWHM_nm/2.35/pixSz_nm;%manually estimated cytoplasmic gaussian contribution
     cytoBgWidthMin=cytoBgFWHMmin_nm/2.35/pixSz_nm;
     cytoBgWidthMax=cytoBgFWHMmax_nm/2.35/pixSz_nm;
@@ -189,6 +196,10 @@ else
         lb(5) = 0;
         ub(5) = 0;
     end
+end
+
+if usePriorInitGuess %use a supplied initGuess instead of automatically calculated one
+    initGuess = priorInitGuess;
 end
 
 if doShowFitResult 

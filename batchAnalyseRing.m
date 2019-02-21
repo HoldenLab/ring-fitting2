@@ -37,6 +37,7 @@ function batchAnalyseRing(fileFilter,pixSz,varargin)
 %   >> batchAnalyseRing('*.tif',pixSz,'FixedRadiusFit',false)
 %   Optionally you can save the non-background subtracted kymograph
 %   >> batchAnalyseRing('*.tif',pixSz,`'SaveRawKymograph',true)
+%TODO fix the diameter file bug
 
 f = dir(fileFilter);
 nF= numel(f);
@@ -110,8 +111,8 @@ end
 ringStack = imreadstack(fname);
 
 % calculate the kymograph
-[ ringStack_noBg,kymo,circFit,kymoInfo, kymoraw] = doBgSubAndKymo(ringStack,pixSz,lineProfileWidth,psfFWHM,ringFitArg{:});
-save([savepath,filesep,name,'_fitData.mat'],'circFit','kymoInfo');
+[ ringStack_noBg,kymo,circFit,kymoInfo, kymoraw,fitPar] = doBgSubAndKymo(ringStack,pixSz,lineProfileWidth,psfFWHM,ringFitArg{:});
+save([savepath,filesep,name,'_fitData.mat'],'circFit','kymoInfo','fitPar');
 %write a text file with the radius for quick reference
 diamNm = round(kymoInfo(:,3))*2;
 radius_fname = [savepath,filesep,name,'_diamInfo','.txt'];

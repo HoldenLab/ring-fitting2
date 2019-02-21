@@ -1,4 +1,4 @@
-function [ ringStack_noBg, ringKymograph, circleData, kymoInfo, rawKymograph] = doBgSubAndKymo(ringStack,pixSzNm,lineWidthNm, psfFWHM,varargin)
+function [ ringStack_noBg, ringKymograph, circleData, kymoInfo, rawKymograph, fitPar] = doBgSubAndKymo(ringStack,pixSzNm,lineWidthNm, psfFWHM,varargin)
 % function [ ringStack_noBg, ringKymograph, circleData, kymoInfo] = doBgSubAndKymo(ringStack,pixSzNm,lineWidthNm, psfFWHM,varargin)
 %extract circular kymograph, integrating over widthNM annulus thickness
 %use fitting to the ring to find the diameter, should make it more robust eg on small rings
@@ -20,6 +20,7 @@ function [ ringStack_noBg, ringKymograph, circleData, kymoInfo, rawKymograph] = 
 %   'ZeroPadKymograph', doZeroPadKymo: Add a zero row as the last row of the kymograph so that ImageJ plotting defaults to the correct contrast. DEFAULT: true
 %   'FixedRadiusFit', doFixedRadiusFit: Fix the ring radius and position to the average ring position. Useful for cells that dont constrict within timeframe of imaging. If the cells constrict you need to turn this off. DEFAULT: true 
 % NOTE: If the background subtration fails for some frames - slow fitting, bright bands in the kymographs - this is usually because 'FixedRadiusFit' is set to true, but the radius is changing  - try changing 'FixedRadiusFit' to false. If the radius is changign the FixedRadiusFit gives bad results as the average radius is not a good match for all frames
+%TODO:save fit par
 
 nargin = numel(varargin);
 fitRingArg={};
@@ -55,7 +56,11 @@ for ii =1:nFr
     
     %fit each ring.
     display(['Frame: ',num2str(ii)]);
-    [ringIm_noBg, ringKymoCell{ii}, circleData{ii}, rawKymoCell{ii}] = bgSubAndProfile(ringStack(:,:,ii),pixSzNm,lineWidthNm, psfFWHM,doFixedRadiusFit,fitParAvg,fitRingArg{:});
+    if ii==1
+        [ringIm_noBg, ringKymoCell{ii}, circleData{ii}, rawKymoCell{ii},fitPar(ii,:)] = bgSubAndProfile(ringStack(:,:,ii),pixSzNm,lineWidthNm, psfFWHM,doFixedRadiusFit,fitParAvg,fitRingArg{:});
+    else
+        [ringIm_noBg, ringKymoCell{ii}, circleData{ii}, rawKymoCell{ii},fitPar(ii,:)] = bgSubAndProfile(ringStack(:,:,ii),pixSzNm,lineWidthNm, psfFWHM,doFixedRadiusFit,fitParAvg,'InitialGuess', fitPar(ii-1,:), fitRingArg{:});
+    end
     kymoSz(ii,:) = size(ringKymoCell{ii});
     rNm=circleData{ii}.r*pixSzNm;
     kymoInfo(ii,:) = [ii,rNm,kymoSz(ii,1),kymoSz(ii,2)];
@@ -76,7 +81,7 @@ end
 
 
 %------------------------------------------------------------------
-function [ringIm_noBg,ringIntensity, circleData, rawRingIntensity] = bgSubAndProfile(ringIm,pixSzNm,lineWidthNm, psfFWHM,doFixedRadiusFit,fitParAvg,varargin)
+function [ringIm_noBg,ringIntensity, circleData, rawRingIntensity,fitPar] = bgSubAndProfile(ringIm,pixSzNm,lineWidthNm, psfFWHM,doFixedRadiusFit,fitParAvg,varargin)
 %extract circular kymograph, integrating over widthNM annulus thickness
 %use fitting to the ring to find the diameter, should make it more robust eg on small rings
 
