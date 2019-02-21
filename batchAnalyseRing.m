@@ -43,8 +43,9 @@ nF= numel(f);
 
 hF= figure;
 for ii = 1:nF
-    fname = f(ii).name;
-    fname
+    file = f(ii).name;
+    folder=f(ii).folder;
+    fname = fullfile(folder,file);
     try 
         ringCorrectAndFit_bgFitter(fname,pixSz,varargin{:});
     catch ME
@@ -105,7 +106,6 @@ end
 if ~exist(savepath,'dir')
     mkdir(savepath);
 end
-
 ringStack = imreadstack(fname);
 
 % calculate the kymograph

@@ -183,15 +183,12 @@ if plotOn || (~isempty(DEBUG_RING) && DEBUG_RING==true)
     figure;
 
     subplot(2,2,1);
-    title('raw');
     x = fitPar(1);
     y = fitPar(2);
     r = fitPar(3);
     r0*pixSz_nm;
 
-    %figure; 
     hold off;
-    %imagesc(fg);
     imagesc(im);
     colormap gray;
     hold all;
@@ -206,28 +203,25 @@ if plotOn || (~isempty(DEBUG_RING) && DEBUG_RING==true)
     yunit = r0 * sin(th) + y0;
     plot(xunit, yunit,'g');
     axis equal;
-%     legend('Fit','Initial Guess');
-    %figure;
-    %imagesc(fitIm);
-    %axis equal;
+    title('raw');
 
     subplot(2,2,2);
-    title('fitted image');
     imagesc(fitIm);
     colormap gray;
     axis equal;
+    title('fitted image');
 
     subplot(2,2,3);
-    title('difference');
     imagesc(im-fitIm);
     colormap gray;
     axis equal;
+    title('difference');
 
     subplot(2,2,4);
-    title('bg sub');
     imagesc(im-bgIm);
     colormap gray;
     axis equal;
+    title('bg sub');
 
         
     if ~isempty(DEBUG_RING) && DEBUG_RING==true
@@ -240,8 +234,6 @@ if plotOn || (~isempty(DEBUG_RING) && DEBUG_RING==true)
         tiffwrite('analysed/noRingIm.tif',noRing);
         tiffwrite('analysed/bgSub.tif',im-bgIm);
         keyboard;
-    else
-        pause;
     end
 end
 
