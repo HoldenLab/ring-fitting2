@@ -18,7 +18,7 @@ plotOn=true;
 %[imBgSub, ringKymograph, circleData, kymoInfo] = doBgSubAndKymo(imS,pixSz,lineWidthNm, psfFWHM)
 %batchAnalyseRing(fname2,pixSz,'FixedRadiusFit',true)
 %batchAnalyseRing(fname2,pixSz,'FixedRadiusFit',false)
-batchAnalyseRing(fname2,pixSz,'FixedRadiusFit',false,'SaveRawKymograph',true)
+batchAnalyseRing(fname2,pixSz,'FixedRadiusFit',false,'SaveRawKymograph',true,'ShowFitOutcome',true)
 
 load('C:\Users\nsh167\Documents\development\github\ring-fitting2\testing\analysed\180327_Sam1_1mW_RingHiLO_2_MMStack_Pos0.ome_denoise_reg_ring11_fitData.mat')
 figure;hold all
@@ -30,4 +30,6 @@ plot(w2);
 xlabel('frame');
 legend('w1','w2');
 saveas(gcf,'analysed/180327_Sam1_1mW_RingHiLO_1_MMStack_Pos0.ome_denoise_reg_ring1.fitted width plot.fig');
+
+batchAnalyseRing(fname2,pixSz,'FixedRadiusFit',true,'SaveRawKymograph',true,'ShowFitOutcome',true)
 

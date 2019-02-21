@@ -83,7 +83,7 @@ while ii<=numel(varargin)
     elseif strcmp(varargin{ii},'RingRadius-max') %best to set this pretty close to the max plausible ring radius
         radMax_nm= varargin{ii+1};
         ii=ii+2;
-    elseif strcmp(varargin{ii},'FixedRadiusFit') %best to set this pretty close to the max plausible ring radius
+    elseif strcmp(varargin{ii},'FixedRadiusFit') 
         doFixedRadiusFit = true;
         fitParAvg= varargin{ii+1};
         ii=ii+2;
@@ -140,8 +140,8 @@ cytoBgWidth2min = cytoBgWidthMin;
 cytoBgWidth2max = inf;
 
 r0 = min(radGuess(fg),radMax);
-amplitude0 = max(fg(:));
 bg0=mean(im(otsuThresh==1));
+amplitude0 = max(im(:));
 cytoplasmBg0 = max(im(:));
 sectorAmp0(1:NSECTOR) = 1;
 
@@ -157,17 +157,19 @@ else
     wMax = width0+psfWidthExtraNm/2.35/pixSz_nm;
     lb =[-inf, -inf,0,wMin,0,0,0,cytoBgWidthMin,cytoBg2min,cytoBgWidth2min,zeros(size(sectorAmp0))];
     ub = [inf,inf,radMax,wMax,inf,inf,inf,cytoBgWidthMax,cytoBg2max,cytoBgWidth2max,ones(size(sectorAmp0))];
-    if doSetRadius
-        radiusManualPix = radiusManual/pixSz_nm;
-        initGuess(3) = radiusManualPix;
-        lb(3) = radiusManualPix;
-        ub(3) = radiusManualPix;
-    end
-    if doCytoOnlyFit
-        initGuess(5) = 0;
-        lb(5) = 0;
-        ub(5) = 0;
-    end
+end
+
+if doSetRadius
+    radiusManualPix = radiusManual/pixSz_nm;
+    initGuess(3) = radiusManualPix;
+    lb(3) = radiusManualPix;
+    ub(3) = radiusManualPix;
+end
+
+if doCytoOnlyFit
+    initGuess(5) = 0;
+    lb(5) = 0;
+    ub(5) = 0;
 end
 
 if usePriorInitGuess %use a supplied initGuess instead of automatically calculated one

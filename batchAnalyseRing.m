@@ -46,7 +46,7 @@ hF= figure;
 for ii = 1:nF
     file = f(ii).name;
     folder=f(ii).folder;
-    fname = fullfile(folder,file);
+    fname = fullfile(folder,file)
     try 
         ringCorrectAndFit_bgFitter(fname,pixSz,varargin{:});
     catch ME
