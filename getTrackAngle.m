@@ -3,12 +3,12 @@ function [trackCirc,theta,rkymo,rtrack]= getTrackAngle(track,circleFitData,pixSz
 %trackCirc = [track,theta,rtrack,rkymo];
 
 PIXOFFSET=-1;%1 pixel shift between trackmate and matlab
+circCentreOffset=0;%Matlab fitted so offset should be zero in any sane world
 
 x0=[]; 
 y0=[];
 r0=[];
 nFr = numel(circleFitData);
-circCentreOffset= +1/2;
 for ii = 1:nFr
     x0(ii) = circleFitData{ii}.z(1)+circCentreOffset;
     y0(ii) = circleFitData{ii}.z(2)+circCentreOffset;
