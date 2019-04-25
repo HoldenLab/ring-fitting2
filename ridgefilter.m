@@ -1,9 +1,5 @@
-function [ridge valley gxx gyy ] = ridgefilter(im,blurSigma)
+function [ridge valley] = ridgefilter(im)
 %ridge filter = major eigenvalue of the image hessian
-if ~exist('blurSigma','var')
-    blurSigma = 1;
-end
-im= imgaussfilt(im,blurSigma);
 
 [gx, gy] = gradient(double(im));
 [gxx, gxy] = gradient(gx);
