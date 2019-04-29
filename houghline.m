@@ -1,4 +1,4 @@
-function houghline(BW,suppressNHood,thresh,fillgap,minlen)
+function [H T R] = houghline(BW,suppressNHood,thresh,fillgap,minlen)
 
 
 [H,T,R] = hough(BW);
