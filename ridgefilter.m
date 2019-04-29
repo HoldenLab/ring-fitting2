@@ -16,4 +16,4 @@ for ii = 1:numel(im)
     valley(ii) = max(e);
     ridge(ii) = -1*min(e);
 end
-ridge(ridge>0)=0;:
+ridge(ridge<0)=0;
