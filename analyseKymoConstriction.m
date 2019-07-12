@@ -1,14 +1,32 @@
 function [dt,fittable,h1] = analyseKymoConstriction(fname)
 %[dt] = analyseKymoConstriction(imname);
 
+MAXDIAM = 1000/65;
 im = imread(fname);
+
 [h,w]=size(im);
-for ii = 1:h
-    [FWHM(ii), intensity(ii), widthResult] = fitProfile(im,w,ii);
+
+immin=1;
+immax=h;
+cropname = [fname(1:end-4),'_minfr.txt'];
+if exist(cropname,'file')
+    croplim=importdata(cropname);
+    immin = croplim(1);
+    if numel(croplim)>1
+        immax= croplim(2);
+    end
 end
-t=1:h;
 
-
+kk=1;
+for ii = immin:immax
+    [FWHM(kk), intensity(kk), widthResult] = fitProfile(im,w,ii);
+    kk=kk+1;
+end
+t=immin:immax;
+badIdx = FWHM>MAXDIAM;
+FWHM(badIdx)=[];
+intensity(badIdx)=[];
+t(badIdx)=[];
 
 % need a way to delete all the crap after constriction finishes
 % Constriction end is just after intensity peak
@@ -28,7 +46,6 @@ tConsEnd = tCrop(find(iDiff<0,1)-1);
 %format output as table
 fittable = table(t',FWHM',intensity','VariableNames',{'Frame','FWHM','maxintensity'});
 
-
 %fit the width function to the data
 % t0 = a(1);
 % t1 = a(2);
@@ -46,13 +63,12 @@ t1 = a(2);
 d = a(3);
 wFit = piecewiseLinearWidth(a,tCrop);
 
-
 dt = tConsEnd-t0;
 
 h1=figure;
 subplot(2,1,1);
 hold all;
-plot(FWHM,'--');
+plot(t,FWHM,'--');
 plot(tCrop,fCrop,'b-');
 ylim([0 1.2*max(fCrop)])
 plot(tConsEnd,0,'r*')
