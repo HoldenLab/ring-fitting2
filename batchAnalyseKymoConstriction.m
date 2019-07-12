@@ -1,0 +1,5 @@
+function batchAnalyseKymoConstriction(filefilter)
+
+
+end
+
