@@ -1,4 +1,4 @@
-function batchAnalyseKymoConstriction(filefilter)
+function batchAnalyseKymoConstriction(filefilter,varargin)
 %function batchAnalyseKymoConstriction(filefilter)
 
 
@@ -11,7 +11,7 @@ for ii = 1:nF
     fname = fullfile(folder,file)
     fnameList{ii} = fname;
     try 
-         [dt(ii),fittable,h1] = analyseKymoConstriction(fname);
+         [dt(ii),fittable,h1,diam0(ii)] = analyseKymoConstriction(fname,varargin{:});
          saveas(h1,[fname(1:end-4),'_wplot.fig']);
          saveas(h1,[fname(1:end-4),'_wplot.png']);
          writetable(fittable,[fname(1:end-4),'_wdata.csv'])
@@ -20,7 +20,7 @@ for ii = 1:nF
     end
 end
 
-t=table(fnameList',dt','VariableNames',{'Filename','ConstrictionTime'});
+t=table(fnameList',dt',diam0','VariableNames',{'Filename','ConstrictionTime','InitialDiameter'});
 savename= fullfile(folder,'constrictionTimeList.csv');
 writetable(t,savename);
 

@@ -1,20 +1,29 @@
-function [dt,fittable,h1] = analyseKymoConstriction(fname)
+function [dt,fittable,h1,diam0] = analyseKymoConstriction(fname,pixsz)
 %[dt] = analyseKymoConstriction(imname);
 
-MAXDIAM = 1000/65;
+if ~exist('pixsz')
+    pixsz=65;
+end
+
+MAXDIAM = 1000;
+MINDIAM = 50;
 im = imread(fname);
 
-[h,w]=size(im);
+[nfr,w]=size(im);
 
 immin=1;
-immax=h;
-cropname = [fname(1:end-4),'_minfr.txt'];
+immax=nfr;
+cropname = [fname(1:end-4),'_frlim.txt'];
 if exist(cropname,'file')
     croplim=importdata(cropname);
     immin = croplim(1);
     if numel(croplim)>1
         immax= croplim(2);
     end
+else
+    %make the file
+    frlim=[immin;immax];
+    dlmwrite(cropname,frlim)
 end
 
 kk=1;
@@ -22,8 +31,9 @@ for ii = immin:immax
     [FWHM(kk), intensity(kk), widthResult] = fitProfile(im,w,ii);
     kk=kk+1;
 end
+FWHM=FWHM.*pixsz;
 t=immin:immax;
-badIdx = FWHM>MAXDIAM;
+badIdx = FWHM>MAXDIAM | FWHM<MINDIAM;
 FWHM(badIdx)=[];
 intensity(badIdx)=[];
 t(badIdx)=[];
@@ -49,7 +59,7 @@ fittable = table(t',FWHM',intensity','VariableNames',{'Frame','FWHM','maxintensi
 %fit the width function to the data
 % t0 = a(1);
 % t1 = a(2);
-% d = a(3);
+% diam0 = a(3);
 tCrop= t(1:idxMax);
 fCrop = FWHM(1:idxMax);
 iCrop = intensity(1:idxMax);
@@ -60,7 +70,7 @@ options = optimoptions('lsqcurvefit','Display','off');
 a = lsqcurvefit(@piecewiseLinearWidth,a0,tCrop,fCrop,lb,ub,options);
 t0 = a(1);
 t1 = a(2);
-d = a(3);
+diam0 = a(3);
 wFit = piecewiseLinearWidth(a,tCrop);
 
 dt = tConsEnd-t0;
@@ -74,6 +84,7 @@ ylim([0 1.2*max(fCrop)])
 plot(tConsEnd,0,'r*')
 plot(tCrop,wFit,'r--')
 ylabel('Diameter (pix)')
+xlim([1,nfr]);
 
 subplot(2,1,2);
 hold all;
@@ -82,6 +93,7 @@ plot(tCrop,iCrop,'b-');
 plot(tConsEnd,iConsEnd,'r*');
 ylabel('max intensity')
 xlabel('frames')
+xlim([1,nfr]);
 
 end
 
