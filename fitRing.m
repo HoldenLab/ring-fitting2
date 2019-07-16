@@ -60,6 +60,7 @@ cytoBgFWHMmax_nm = Inf;
 radMax_nm=600;
 psfWidthExtraNm= 50;%as in +/- psfFWHM
 doFixedRadiusFit=false;
+doFixedPosFit=false;
 doSetRadius=false;
 doCytoOnlyFit=false;
 radiusManual=NaN;
@@ -87,6 +88,9 @@ while ii<=numel(varargin)
     elseif strcmp(varargin{ii},'FixedRadiusFit') 
         doFixedRadiusFit = true;
         fitParAvg= varargin{ii+1};
+        ii=ii+2;
+    elseif strcmp(varargin{ii},'FixedPositionFit') 
+        doFixedPosFit= varargin{ii+1};
         ii=ii+2;
     elseif strcmp(varargin{ii},'Radius') %supply a manually chosen radius
         doSetRadius= true;
@@ -150,8 +154,13 @@ sectorAmp0(1:NSECTOR) = 1;
 if doFixedRadiusFit
     initGuess = fitParAvg;
     initGuess(11:11+NSECTOR-1)=ones(size(sectorAmp0));%reset the sector model
-    lb = [-inf,-inf, fitParAvg(3), fitParAvg(4),0,0,0,fitParAvg(8),cytoBg2min, fitParAvg(10),zeros(size(sectorAmp0))];
-    ub = [inf,inf, fitParAvg(3), fitParAvg(4),inf,inf,inf,fitParAvg(8),cytoBg2max, fitParAvg(10),ones(size(sectorAmp0))];
+    if doFixedPosFit%fix the xy positions as well as radius/ shape pars
+        lb = [fitParAvg(1),fitParAvg(2), fitParAvg(3), fitParAvg(4),0,0,0,fitParAvg(8),cytoBg2min, fitParAvg(10),zeros(size(sectorAmp0))];
+        ub = [fitParAvg(1),fitParAvg(2), fitParAvg(3), fitParAvg(4),inf,inf,inf,fitParAvg(8),cytoBg2max, fitParAvg(10),ones(size(sectorAmp0))];
+    else%fix the radius/ shape pars only
+        lb = [-inf,-inf, fitParAvg(3), fitParAvg(4),0,0,0,fitParAvg(8),cytoBg2min, fitParAvg(10),zeros(size(sectorAmp0))];
+        ub = [inf,inf, fitParAvg(3), fitParAvg(4),inf,inf,inf,fitParAvg(8),cytoBg2max, fitParAvg(10),ones(size(sectorAmp0))];
+    end
 else
     initGuess = [x0,y0,r0,width0,amplitude0,bg0,cytoplasmBg0,cytoBgWidth,cytoBg2_0 ,cytoBgWidth2_0,sectorAmp0];
     wMin = width0-psfWidthExtraNm/2.35/pixSz_nm;
