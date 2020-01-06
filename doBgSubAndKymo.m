@@ -54,7 +54,7 @@ ringStack_noBg = 0.*ringStack;
 for ii =1:nFr
     
     %fit each ring.
-    display(['Frame: ',num2str(ii)]);
+%     display(['Frame: ',num2str(ii)]);
     if ii==1
         [ringIm_noBg, ringKymoCell{ii}, circleData{ii}, rawKymoCell{ii},fitPar(ii,:)] = bgSubAndProfile(ringStack(:,:,ii),pixSzNm,lineWidthNm, psfFWHM,doFixedRadiusFit,fitParAvg,fitRingArg{:});
     else
