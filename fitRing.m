@@ -44,10 +44,12 @@ function [fitPar, fitIm,im_bgsub] = fitRing(im, pixSz_nm,psfFWHM, varargin)
 %   'CytoplasmBG-FWHM', cytoBgFWHM_nm: Initial guess for the FWHM of the large gaussian fitted to account for the defocussed cytoplasmic background. DEFAULT:1300
 %   'CytoplasmBG-FWHM-min', cytoBgFWHMmin_nm: Minimum for the FWHM of the large gaussian fitted to account for the defocussed cytoplasmic background. DEFAULT:1000
 %   'CytoplasmBG-FWHM-max', cytoBgFWHMmax_nm: Maximum for the FWHM of the large gaussian fitted to account for the defocussed cytoplasmic background. DEFAULT:1000
-% NOTE: A second defocussed Gaussian is also fitted, with min width cytoBgFWHMmin_nm, and max width=Inf because a single gaussian does not fit well the cytoplasmic BG distribution.
+%  NOTE: A second defocussed Gaussian is also fitted, with min width cytoBgFWHMmin_nm, and max width=Inf because a single gaussian does not fit well the cytoplasmic BG distribution.
 %   'RingRadius-max', radMax_nm: Maximum fitted ring radius. Default should hold well for WT or even most mutant Bsubtilis but change if in a different organism. If you set it too large the fitting becomes unstable for small rings. DEFAULT: 600
 %   'FixedRadiusFit', fitParAvg: Fix the ring radius and shape parameters to the average ring parameters. Note the ring centroid can still shift to allow for small drifts. Useful for cells that dont constrict within timeframe of imaging. If the cells constrict you need to turn this off. FITPARAVG is the result of a prior fit to an averaged ring, used to fix the positions. DEFAULT:false
-% Note that default FixedRadiusFit value in higher level function doBgSubAndKymo.m is true, so for batch analysis FixedRadiusFit is usually true - it's just false at the bottom level function as the first pass is run with free shape parameters to measure the average radius.
+%     Note that default FixedRadiusFit value in higher level function doBgSubAndKymo.m is true, so for batch analysis FixedRadiusFit is usually true - it's just false at the bottom level function as the first pass is run with free shape parameters to measure the average radius.
+%   'FixedPositionFit', fitParAvg: Fix the ring position to the average ring position.  FITPARAVG is the result of a prior fit to an averaged ring, 
+%     used to fix the positions. DEFAULT: false 
 
 global DEBUG_RING
 %parameters: x0, y0, r,width, Amplitude, BG, cytoplasmBg
@@ -60,6 +62,7 @@ cytoBgFWHMmax_nm = Inf;
 radMax_nm=600;
 psfWidthExtraNm= 50;%as in +/- psfFWHM
 doFixedRadiusFit=false;
+doFixedPosFit=false;
 doSetRadius=false;
 doCytoOnlyFit=false;
 radiusManual=NaN;
@@ -87,6 +90,9 @@ while ii<=numel(varargin)
     elseif strcmp(varargin{ii},'FixedRadiusFit') 
         doFixedRadiusFit = true;
         fitParAvg= varargin{ii+1};
+        ii=ii+2;
+    elseif strcmp(varargin{ii},'FixedPositionFit') 
+        doFixedPosFit= varargin{ii+1};
         ii=ii+2;
     elseif strcmp(varargin{ii},'Radius') %supply a manually chosen radius
         doSetRadius= true;
@@ -150,8 +156,13 @@ sectorAmp0(1:NSECTOR) = 1;
 if doFixedRadiusFit
     initGuess = fitParAvg;
     initGuess(11:11+NSECTOR-1)=ones(size(sectorAmp0));%reset the sector model
-    lb = [-inf,-inf, fitParAvg(3), fitParAvg(4),0,0,0,fitParAvg(8),cytoBg2min, fitParAvg(10),zeros(size(sectorAmp0))];
-    ub = [inf,inf, fitParAvg(3), fitParAvg(4),inf,inf,inf,fitParAvg(8),cytoBg2max, fitParAvg(10),ones(size(sectorAmp0))];
+    if doFixedPosFit%fix the xy positions as well as radius/ shape pars
+        lb = [fitParAvg(1),fitParAvg(2), fitParAvg(3), fitParAvg(4),0,0,0,fitParAvg(8),cytoBg2min, fitParAvg(10),zeros(size(sectorAmp0))];
+        ub = [fitParAvg(1),fitParAvg(2), fitParAvg(3), fitParAvg(4),inf,inf,inf,fitParAvg(8),cytoBg2max, fitParAvg(10),ones(size(sectorAmp0))];
+    else%fix the radius/ shape pars only
+        lb = [-inf,-inf, fitParAvg(3), fitParAvg(4),0,0,0,fitParAvg(8),cytoBg2min, fitParAvg(10),zeros(size(sectorAmp0))];
+        ub = [inf,inf, fitParAvg(3), fitParAvg(4),inf,inf,inf,fitParAvg(8),cytoBg2max, fitParAvg(10),ones(size(sectorAmp0))];
+    end
 else
     initGuess = [x0,y0,r0,width0,amplitude0,bg0,cytoplasmBg0,cytoBgWidth,cytoBg2_0 ,cytoBgWidth2_0,sectorAmp0];
     wMin = width0-psfWidthExtraNm/2.35/pixSz_nm;

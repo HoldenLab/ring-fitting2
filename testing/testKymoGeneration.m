@@ -1,19 +1,13 @@
 
-fname='Denoised-ftsz sam1  hilo4593 3pc 1s em150 001.reg-1.tif';
+fname='180327_Sam1_1mW_RingHiLO_1_MMStack_Pos0.ome_denoise_reg_ring1.tif';
 
-ringStack = double(imreadstack(fname));
 pixSz = 65; % [nm]
 lineWidthNm = pixSz;
 psfFWHM = 300; % [nm]
 
-
-%[ringKymograph, circleData] = getRingKymo(ringStack,pixSz,lineWidthNm, psfFWHM)
-%%nFrame=size(ringStack,3);
-%%fRate=2;
-%figure;
-%imagesc(ringKymograph)
-%axis equal;
-%colormap gray
-%
-%[kymoRaw, kymoCorr] = ringCorrectAndFit(fname,pixSz);
-batchAnalyseRing(fname,pixSz)
+% %just test the vanilla algorithm
+% batchAnalyseRing(fname,pixSz)
+% display('standard alg worked ok');
+%test the new fixPosFit
+batchAnalyseRing(fname,pixSz, 'FixedPositionFit',true)
+display('fixed position fitting completed ok');
