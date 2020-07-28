@@ -14,8 +14,11 @@ function batchAnalyseRing(fileFilter,pixSz,varargin)
 % NOTE: A second defocussed Gaussian is also fitted, with min width cytoBgFWHMmin_nm, and max width=Inf because a single gaussian does not fit well the cytoplasmic BG distribution.
 %   'RingRadius-max', radMax_nm: Maximum fitted ring radius. Default should hold well for WT or even most mutant Bsubtilis but change if in a different organism. If you set it too large the fitting becomes unstable for small rings. DEFAULT: 600
 %   'ZeroPadKymograph', doZeroPadKymo: Add a zero row as the last row of the kymograph so that ImageJ plotting defaults to the correct contrast. DEFAULT: true
-%   'FixedRadiusFit', true/false: Fix the ring radius to the average ring value. Useful for cells that dont constrict within timeframe of imaging. If the cells constrict you need to turn this off. DEFAULT: true 
-%   'FixedPositionFit', true/false: Fix the ring position to the average ring position.  DEFAULT: false 
+%   'FixedRadiusFit', true/false: Fix the ring radius and shape parameters to the average ring parameters. Note the ring centroid can still shift to allow for small drifts. 
+%     Useful for cells that dont constrict within timeframe of imaging. If the cells constrict you need to turn this off. 
+%     FITPARAVG is the result of a prior fit to an averaged ring, used to fix the positions. DEFAULT: true
+%   'FixedPositionFit', true/false: Fix the ring position to the average ring position. This is important for fitting sparse data, esp single molecule, where the ring position is not well constrained.
+%     otherwise the ring position will jump around, which is bad.  DEFAULT: false 
 %   'LineProfileWidth': LineWidth: perpendicular distance over which to integrate line profile signal to improve SNR. DEFAULT:pixSz , ie 1 pixel
 %   'NumKymoRepeats', nKymoWrap: Number of times to plot the kymograph side-by-side in the kymoWrap file. DEFAULT: 2
 %   'SaveRawKymograph', true/false: Save a non-background subtracted kymograph as well. DEFAULT, false
