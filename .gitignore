@@ -6,3 +6,5 @@
 *.exe
 testing/analysed/
 testing/180327_Sam1_1mW_RingHiLO_1_MMStack_Pos0.ome_denoise_reg_ring1_fixedPos.tif
+testing/180327_Sam1_1mW_RingHiLO_1_MMStack_Pos0.ome_denoise_reg_ring1_rad300.tif
+testing/180327_Sam1_1mW_RingHiLO_1_MMStack_Pos0.ome_denoise_reg_ring1_rad400.tif
