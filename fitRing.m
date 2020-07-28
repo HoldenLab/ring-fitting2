@@ -177,9 +177,15 @@ end
 
 if doSetRadius
     radiusManualPix = radiusManual/pixSz_nm;
-    initGuess(3) = radiusManualPix;
-    lb(3) = radiusManualPix;
-    ub(3) = radiusManualPix;
+    if numel(radiusManualPix)==1
+	    initGuess(3) = radiusManualPix;
+	    lb(3) = radiusManualPix;
+	    ub(3) = radiusManualPix;
+    else
+	    initGuess(3) = mean(radiusManualPix);
+	    lb(3) = radiusManualPix(1);
+	    ub(3) = radiusManualPix(2);
+    end
 end
 
 if doCytoOnlyFit
