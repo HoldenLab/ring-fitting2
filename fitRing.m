@@ -51,6 +51,9 @@ function [fitPar, fitIm,im_bgsub] = fitRing(im, pixSz_nm,psfFWHM, varargin)
 %     Note that default FixedRadiusFit value in higher level function doBgSubAndKymo.m is true, so for batch analysis FixedRadiusFit is usually true - it's just false at the bottom level function as the first pass is run with free shape parameters to measure the average radius.
 %   'FixedPositionFit', fitParAvg: Fix the ring position to the average ring position.  FITPARAVG is the result of a prior fit to an averaged ring, 
 %     used to fix the positions. DEFAULT: false 
+%   'SetManualRadius', manualRadiusNm: Sets the septum radius to fixed value manualRadiusNm
+%   'SetManualRadius', [manualRadiusNmMin,manualRadiusNmMax]: limits the septum radius to range defined by 2 element vector. Initial guess is average of the min and max Radius
+%   
 
 global DEBUG_RING
 %parameters: x0, y0, r,width, Amplitude, BG, cytoplasmBg
@@ -98,7 +101,7 @@ while ii<=numel(varargin)
     elseif strcmp(varargin{ii},'FixedPositionFit') 
         doFixedPosFit= varargin{ii+1};
         ii=ii+2;
-    elseif strcmp(varargin{ii},'Radius') %supply a manually chosen radius
+    elseif strcmp(varargin{ii},'SetManualRadius') %supply a manually chosen radius
         doSetRadius= true;
         radiusManual= varargin{ii+1};
         ii=ii+2;
