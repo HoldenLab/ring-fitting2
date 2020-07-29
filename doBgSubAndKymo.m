@@ -20,6 +20,7 @@ function [ ringStack_noBg, ringKymograph, circleData, kymoInfo, rawKymograph, fi
 %   'ZeroPadKymograph', doZeroPadKymo: Add a zero row as the last row of the kymograph so that ImageJ plotting defaults to the correct contrast. DEFAULT: true
 %   'FixedRadiusFit', fitParAvg: Fix the ring radius and shape parameters to the average ring parameters. Note the ring centroid can still shift to allow for small drifts. Useful for cells that dont constrict within timeframe of imaging. If the cells constrict you need to turn this off. FITPARAVG is the result of a prior fit to an averaged ring, used to fix the positions. DEFAULT: true
 %   'FitMaxIP', true/false: Use maximum intensity projection instead of average for the fixed radius/ position fitting
+%   'HoughCircleGuess',true/false:Uses hough circle finding estimator for the initial guess. In general seems more robust than the simple binary estimator
 %
 % NOTE: If the background subtration fails for some frames - slow fitting, bright bands in the kymographs - this is usually because 'FixedRadiusFit' is set to true, but the radius is changing  - try changing 'FixedRadiusFit' to false. If the radius is changign the FixedRadiusFit gives bad results as the average radius is not a good match for all frames
 
