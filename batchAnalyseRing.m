@@ -26,6 +26,7 @@ function batchAnalyseRing(fileFilter,pixSz,varargin)
 %   'SaveFitPNG', true/ false: Save a png of the average image overlaid with the (first) fitted circle
 %   'SetManualRadius', manualRadiusNm: Sets the septum radius to fixed value manualRadiusNm
 %   'SetManualRadius', [manualRadiusNmMin,manualRadiusNmMax]: limits the septum radius to range defined by 2 element vector. Initial guess is average of the min and max Radius
+%   'FitMaxIP', true/false: Use maximum intensity projection instead of average for the fixed radius/ position fitting
 %
 % NOTE: If the background subtration fails for some frames - slow fitting, bright bands in the kymographs - this is usually because 'FixedRadiusFit' is set to true, but the radius is changing  - try changing 'FixedRadiusFit' to false. If the radius is changign the FixedRadiusFit gives bad results as the average radius is not a good match for all frames
 %
@@ -83,7 +84,8 @@ while ii<=numel(varargin)
         || strcmp(varargin{ii},'RingRadius-max') || strcmp(varargin{ii},'ZeroPadKymograph')...
         || strcmp(varargin{ii},'FixedRadiusFit') || strcmp(varargin{ii},'SetManualRadius') ...
         || strcmp(varargin{ii},'CytoplasmOnlyFit')|| strcmp(varargin{ii},'PlotFit')...
-        || strcmp(varargin{ii},'ShowFitOutcome') || strcmp(varargin{ii},'FixedPositionFit')
+        || strcmp(varargin{ii},'ShowFitOutcome') || strcmp(varargin{ii},'FixedPositionFit') ...
+        || strcmp(varargin{ii},'FitMaxIP')
         ringFitArg={ringFitArg{:},varargin{ii:ii+1}};
         ii=ii+1;
     elseif strcmp(varargin{ii},'PsfFWHM')

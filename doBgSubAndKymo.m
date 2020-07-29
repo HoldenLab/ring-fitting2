@@ -19,12 +19,15 @@ function [ ringStack_noBg, ringKymograph, circleData, kymoInfo, rawKymograph, fi
 %   'RingRadius-max', radMax_nm: Maximum fitted ring radius. Default should hold well for WT or even most mutant Bsubtilis but change if in a different organism. If you set it too large the fitting becomes unstable for small rings. DEFAULT: 600
 %   'ZeroPadKymograph', doZeroPadKymo: Add a zero row as the last row of the kymograph so that ImageJ plotting defaults to the correct contrast. DEFAULT: true
 %   'FixedRadiusFit', fitParAvg: Fix the ring radius and shape parameters to the average ring parameters. Note the ring centroid can still shift to allow for small drifts. Useful for cells that dont constrict within timeframe of imaging. If the cells constrict you need to turn this off. FITPARAVG is the result of a prior fit to an averaged ring, used to fix the positions. DEFAULT: true
+%   'FitMaxIP', true/false: Use maximum intensity projection instead of average for the fixed radius/ position fitting
+%
 % NOTE: If the background subtration fails for some frames - slow fitting, bright bands in the kymographs - this is usually because 'FixedRadiusFit' is set to true, but the radius is changing  - try changing 'FixedRadiusFit' to false. If the radius is changign the FixedRadiusFit gives bad results as the average radius is not a good match for all frames
 
 nargin = numel(varargin);
 fitRingArg={};
 doZeroPadKymo = true;
 doFixedRadiusFit = true;
+doMaxFit=false;
 ii = 1;
 while ii<=numel(varargin)
     if strcmp(varargin{ii},'ZeroPadKymograph')
@@ -32,6 +35,9 @@ while ii<=numel(varargin)
         ii=ii+2;
     elseif strcmp(varargin{ii},'FixedRadiusFit')
         doFixedRadiusFit=varargin{ii+1};
+        ii=ii+2;
+    elseif strcmp(varargin{ii},'FitMaxIP')
+        doMaxFit=varargin{ii+1};
         ii=ii+2;
     else
         fitRingArg={fitRingArg{:},varargin{ii}};
@@ -43,8 +49,12 @@ ringStack = double(ringStack);
 
 %optionally find the radius etc from the average of whole movie
 if doFixedRadiusFit
-    ringAvg = mean(ringStack,3);
-    fitParAvg = fitRing(ringAvg, pixSzNm,psfFWHM, fitRingArg{:});
+    if doMaxFit
+        ringIm = max(ringStack,[],3);
+    else
+        ringIm = mean(ringStack,3);
+    end
+    fitParAvg = fitRing(ringIm, pixSzNm,psfFWHM, fitRingArg{:});
 else
     fitParAvg=[];
 end
