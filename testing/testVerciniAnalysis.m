@@ -11,6 +11,6 @@ pixSz = 65; % [nm]
 %3. Run the analysis
 %Results will be saved to testing/analysed
 verciniAnalysis(fname,pixSz);
-display('Standard VerCINI analysis algoritm completed ok');
+display('Standard VerCINI analysis completed ok');
 
 

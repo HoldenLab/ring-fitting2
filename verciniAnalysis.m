@@ -42,7 +42,7 @@ function verciniAnalysis(fileFilter,pixSz,varargin)
 %   'CytoplasmBG-FWHM-min', cytoBgFWHMmin_nm: Minimum for the FWHM of the large gaussian fitted to account for the defocussed cytoplasmic background. DEFAULT:800
 %   'CytoplasmBG-FWHM-max', cytoBgFWHMmax_nm: Maximum for the FWHM of the large gaussian fitted to account for the defocussed cytoplasmic background. DEFAULT:Inf
 %       NOTE: A second defocussed Gaussian is also fitted, with min width cytoBgFWHMmin_nm, and max width=Inf because a single gaussian does not fit well the cytoplasmic BG distribution.
-%   'CytoplasmOnlyFit' Dont fit a ring - useful for calibration/ testing analysis of cytoplasmic GFP samples - force the ring amplitude to zero for cyto only fit
+%   'CytoplasmOnlyFit', true/false (default:false): Dont fit a ring - useful for calibration/ testing analysis of cytoplasmic GFP samples - force the ring amplitude to zero for cyto only fit
 %   'FitMaxIP', true/false (default:false): Use maximum intensity projection instead of average for the fixed radius/ position fitting. Useful for single molecule data.
 %   'LineProfileWidth', LineWidth (default:pixSz , ie 1 pixel): perpendicular distance over which to integrate line profile signal to improve SNR. 
 %   'PsfFWHM', psfFWHM (default:300 nm): Fitted PSF FWHM, nm. Determines PSF size used to blur the fitted ring. 
