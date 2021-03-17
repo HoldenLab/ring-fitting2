@@ -1,8 +1,8 @@
 # ring-fitting2
 INFORMATION 
 
-MATLAB software for background subtraction and kymograph fitting for fluorescence microscopy of vertically immobilized bacteria using VerCINI (Vertical Cell Imaging by Nanostructured Immobilization). First published in Whitley et al, bioRxiv 2020. 
-This code is provided as is and without warranty.
+Software for background subtraction and kymograph fitting for fluorescence microscopy image stacks of vertically immobilized bacteria using VerCINI (Vertical Cell Imaging by Nanostructured Immobilization). First published in Whitley et al, bioRxiv 2020. 
+This software is provided as is and without warranty.
 
 OVERVIEW
 
@@ -29,6 +29,7 @@ All files are distributed under the GPLv3 and (c) 2020 Seamus Holden, Newcastle 
 CITATION
 
 If you use this software in work leading to a scientifc publication, please cite: 
+
 FtsZ treadmilling is essential for Z-ring condensation and septal constriction initiation in Bacillus subtilis cell division
 Kevin D. Whitley, Calum Jukes, Nicholas Tregidgo, Eleni Karinou, Pedro Almada, Ricardo Henriques, Cees Dekker, Séamus Holden
 bioRxiv 2020.07.01.182006; doi: https://doi.org/10.1101/2020.07.01.182006
