@@ -4,6 +4,7 @@ function manualVerciniAnalysis(fileFilter,pixSz,nKymoWrap)
 % intensity projection of the stack
 % This is mostly used for sparse single molecule datasets if automated VerCINI analysis has failed
 % Automatically analyses all files matching "fileFilter" string
+% All results are saved in 'analysed' subdirectory of the current working directory
 %
 % NOTE: By default, TWO copies of the kymograph are plotted side by side, ie wrapping around the cell circumference twice, 
 % 0->720degrees. This is so that dynamics at the 360degree->0degree transition can still be identified
