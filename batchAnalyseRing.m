@@ -129,9 +129,15 @@ ringStack = imreadstack(fname);
 [ ringStack_noBg,kymo,circFit,kymoInfo, kymoraw,fitPar] = doBgSubAndKymo(ringStack,pixSz,lineProfileWidth,psfFWHM,ringFitArg{:});
 save([savepath,filesep,name,'_fitData.mat'],'circFit','kymoInfo','fitPar');
 %write a text file with the radius for quick reference
-diamNm = round(kymoInfo(:,3))*2;
+Diameter_nm = round(kymoInfo(:,2))*2;
+Frame= kymoInfo(:,1);
+T = table(Frame,Diameter_nm);
+if numel(unique(Diameter_nm))==1
+    T=T(1,:);
+end
+
 radius_fname = [savepath,filesep,name,'_diamInfo','.txt'];
-dlmwrite(radius_fname,diamNm);
+writetable(T,radius_fname);
 
 %make 2pi versions of everything for convenience
 kymo_wrap = repmat(kymo,[1,nKymoWrap]);
