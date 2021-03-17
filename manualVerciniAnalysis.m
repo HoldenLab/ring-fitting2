@@ -22,8 +22,6 @@ function manualVerciniAnalysis(fileFilter,pixSz,nKymoWrap)
 %
 % OPTIONAL INPUTS 
 %   nKymoWrap (default:2): Number of times to plot the kymograph side-by-side in the kymoWrap file.
-% 
-%TODO SAVE THE DIAMETER
 if ~exist('nKymoWrap')
     nKymoWrap=2;
 end
@@ -60,13 +58,16 @@ end
 % calculate the kymograph
 ringStack=imreadstack(fname);
 [ kymo,circleData] = doManualKymo(ringStack,pixSz);
+
+%save the fit data
+save([savepath,filesep,name,'_fitData.mat'],'circleData');
+%save the diameter to a text file
 Diameter_nm=round(circleData.r*pixSz)*2;
 Frame= 1;
 T = table(Frame,Diameter_nm);
 radius_fname = [savepath,filesep,name,'_diamInfo','.txt'];
 writetable(T,radius_fname);
 
-save([savepath,filesep,name,'_fitData.mat'],'circleData');
 %make 2pi versions of everything for convenience
 kymo_wrap = repmat(kymo,[1,nKymoWrap]);
 
