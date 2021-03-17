@@ -1,31 +1,45 @@
 function verciniAnalysis(fileFilter,pixSz,varargin)
 % Performs circular kymograph analysis for VerCINI microscopy data of vertically immobilized bacteria
+% Septa/ cell circumference is localized to sub-pixel precision by fitting an explicit model (defined in fitRing.m) of 
+% a blurred annulus two large width Gaussians to account for diffuse and out of focus cytoplasmic background, plus a baseline.
+% The fitted background contribution is subtracted from each image, and a kymograph calculated along the circular line profile 
+% of the cell circumference.
+% By default the background subtracted image and kymograph are saved. 
+% NOTE: By default, TWO copies of the kymograph are plotted side by side, ie wrapping around the cell circumference twice, 
+% 0->720degrees. This is so that dynamics at the 360degree->0degree transition can still be identified
+% NOTE: If the background subtraction fails for some frames - slow fitting, bright bands in the kymographs - this is usually because 'FixedRadiusFit' is set to true, but the radius is changing, or because 'FixedPositionFit' is set to true but the cell position is changing (drift) - try changing 'FixedRadiusFit' or 'FixedPositionFit' to false.
+% NOTE: By default, a zero row is added as the last row of the kymograph so that ImageJ plotting defaults to the "correct" contrast for a background subtracted image, ie black = 0 counts. You can turn this off with 'ZeroPadKymograph', false
 % INPUTS:
 %   fileFilter: Search string for files to analyse, eg '*.tif'
+%       Input image stacks should be cropped movies of septum/ circumferentially localized protein dynamics.
+%       Input image stacks should be cropped to contain one cell only
+%       Cell should not overlap image edges.
 %   pixSz: Camera pixel size in nanometres
 % OUTPUTS:
 %   Files, in subdirectory analysed:
-%       <filename>_bgsub.tif: Background subtracted ring 
+%       <filename>_bgsub.tif: Background subtracted vercini image stack
 %       <filename>_kymo.tif: Kymograph
 %       <filename>_kymoWrap.tif: Kymograph, repeated nKymoWrap times
 %       <filename>_fitData.mat: Fit results
-%       <filename>_diamInfo.txt: Ring diameter, each frame
+%       <filename>_diamInfo.txt: Ring diameter, each frame if constricting, otherwise only defined for first frame (same for the rest)
+%
+%
 % OPTIONAL INPUTS (commonly used):
-%   'FixedRadiusFit', true/false: Fix the ring radius and shape parameters to the average ring parameters. Note the ring centroid can still shift to allow for small drifts. 
+%   'FixedRadiusFit', true/false (default:true): Fix the ring radius and shape parameters to the average ring parameters. Note the ring centroid can still shift to allow for small drifts. 
 %     Useful for cells that dont constrict within timeframe of imaging. If the cells constrict you need to turn this off. 
-%     FITPARAVG is the result of a prior fit to an averaged ring, used to fix the positions. DEFAULT: true
-%   'FixedPositionFit', true/false (default:false): Fix the ring position to the average ring position. This is important for fitting sparse data, esp single molecule, where the ring position is not well constrained. Otherwise the ring position will jump around, which is bad.  
+%     FITPARAVG is the result of a prior fit to an averaged ring, used to fix the positions.
+%   'FixedPositionFit', true/false (default:false): Fix the ring position to the average ring position. This is set to fals by default to allow for small cell drifts during acquisition. However, for fitting sparse data, especially single molecule data, the ring position is not well constrained based only on a single image. In that case, it is important to set this option to true and use the average ring position, to avoid the ring position jumping large amounts frame to frame which is obviously bad.  This problem - ring fit jumping, may also occur to a lesser degree than for single molecule data for moderately sparse data, like nascent Z-rings. Again, if that is likely, set this option to true.
 %   'NumKymoRepeats', nKymoWrap (default:2): Number of times to plot the kymograph side-by-side in the kymoWrap file.
 %   'SaveRawKymograph', true/false (default:false): Save a non-background subtracted kymograph as well. 
 %   'SaveFitPNG', true/ false (default:true): Save a png of the average image overlaid with the (first) fitted circle
-%   'ZeroPadKymograph', true/ false (default:true): Add a zero row as the last row of the kymograph so that ImageJ plotting defaults to the correct contrast. DEFAULT: true
+%   'ZeroPadKymograph', true/ false (default:true): Add a zero row as the last row of the kymograph so that ImageJ plotting defaults to the correct contrast. 
 % OPTIONAL INPUTS (advanced):
 %   'CytoplasmBG-FWHM', cytoBgFWHM_nm: Initial guess for the FWHM of the large gaussian fitted to account for the defocussed cytoplasmic background. DEFAULT:1300
 %   'CytoplasmBG-FWHM-min', cytoBgFWHMmin_nm: Minimum for the FWHM of the large gaussian fitted to account for the defocussed cytoplasmic background. DEFAULT:800
 %   'CytoplasmBG-FWHM-max', cytoBgFWHMmax_nm: Maximum for the FWHM of the large gaussian fitted to account for the defocussed cytoplasmic background. DEFAULT:Inf
 %       NOTE: A second defocussed Gaussian is also fitted, with min width cytoBgFWHMmin_nm, and max width=Inf because a single gaussian does not fit well the cytoplasmic BG distribution.
 %   'CytoplasmOnlyFit' Dont fit a ring - useful for calibration/ testing analysis of cytoplasmic GFP samples - force the ring amplitude to zero for cyto only fit
-%   'FitMaxIP', true/false (default:false): Use maximum intensity projection instead of average for the fixed radius/ position fitting
+%   'FitMaxIP', true/false (default:false): Use maximum intensity projection instead of average for the fixed radius/ position fitting. Useful for single molecule data.
 %   'LineProfileWidth', LineWidth (default:pixSz , ie 1 pixel): perpendicular distance over which to integrate line profile signal to improve SNR. 
 %   'PsfFWHM', psfFWHM (default:300 nm): Fitted PSF FWHM, nm. Determines PSF size used to blur the fitted ring. 
 %   'PsfWidthRangeNm',psfWidthExtraNm: Wiggle room allowed on fitted PSF FHWM. Ie fitted PSF width can be within range psfFWHM +/- psfWidthExtraNm. DEFAULT: 50
@@ -35,17 +49,21 @@ function verciniAnalysis(fileFilter,pixSz,varargin)
 % OPTIONAL INPUTS (developer/debug):
 %   'HoughCircleGuess',true/false: (Experimental) Uses hough circle finding estimator for the initial guess. From initial testing seems more robust than the simple binary estimator. 
 %
-% NOTE: If the background subtration fails for some frames - slow fitting, bright bands in the kymographs - this is usually because 'FixedRadiusFit' is set to true, but the radius is changing  - try changing 'FixedRadiusFit' to false. If the radius is changign the FixedRadiusFit gives bad results as the average radius is not a good match for all frames
 %
 %
 % EXAMPLES:
 %   
-%   By default, fits with fixed radius based on average image
 %   >> verciniAnalysis('*.tif',pixSz)
-%   Alternatively, fit with a free radius to allow for constriction
+%      By default, fits with fixed radius based on average image
+%
 %   >> verciniAnalysis('*.tif',pixSz,'FixedRadiusFit',false)
-%   Optionally you can save the non-background subtracted kymograph
-%   >> verciniAnalysis('*.tif',pixSz,`'SaveRawKymograph',true)
+%      Alternatively, fit with a free radius to allow for constriction
+%
+%   >> verciniAnalysis('*.tif',pixSz,'SaveRawKymograph',true)
+%      Optionally you can save the non-background subtracted kymograph
+%
+%   >> verciniAnalysis('*.tif',pixSz,'FixedPositionFit', true)
+%      Optionally you can fit the septum centroid position to that of the average image. Useful for single molecule or otherwise sparse data.
 
 
 f = dir(fileFilter);
