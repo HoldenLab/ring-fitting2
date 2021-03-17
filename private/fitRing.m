@@ -51,6 +51,10 @@ function [fitPar, fitIm,im_bgsub] = fitRing(im, pixSz_nm,psfFWHM, varargin)
 %     Note that default FixedRadiusFit value in higher level function doBgSubAndKymo.m is true, so for batch analysis FixedRadiusFit is usually true - it's just false at the bottom level function as the first pass is run with free shape parameters to measure the average radius.
 %   'FixedPositionFit', fitParAvg: Fix the ring position to the average ring position.  FITPARAVG is the result of a prior fit to an averaged ring, 
 %     used to fix the positions. DEFAULT: false 
+%   'SetManualRadius', manualRadiusNm: Sets the septum radius to fixed value manualRadiusNm
+%   'SetManualRadius', [manualRadiusNmMin,manualRadiusNmMax]: limits the septum radius to range defined by 2 element vector. Initial guess is average of the min and max Radius
+%   'HoughCircleGuess',true/false:Uses hough circle finding estimator for the initial guess. In general seems more robust than the simple binary estimator
+%   
 
 global DEBUG_RING
 %parameters: x0, y0, r,width, Amplitude, BG, cytoplasmBg
@@ -70,6 +74,7 @@ radiusManual=NaN;
 doShowFitResult = false;
 nargin = numel(varargin);
 usePriorInitGuess=false;
+doHoughCircleGuess=false;
 priorInitGuess = [];
 ii = 1;
 while ii<=numel(varargin)
@@ -98,7 +103,7 @@ while ii<=numel(varargin)
     elseif strcmp(varargin{ii},'FixedPositionFit') 
         doFixedPosFit= varargin{ii+1};
         ii=ii+2;
-    elseif strcmp(varargin{ii},'Radius') %supply a manually chosen radius
+    elseif strcmp(varargin{ii},'SetManualRadius') %supply a manually chosen radius
         doSetRadius= true;
         radiusManual= varargin{ii+1};
         ii=ii+2;
@@ -107,6 +112,9 @@ while ii<=numel(varargin)
         ii=ii+2;
     elseif strcmp(varargin{ii},'ShowFitOutcome') %force the ring amplitude to zero for cyto only fit
         doShowFitResult= varargin{ii+1};
+        ii=ii+2;
+    elseif strcmp(varargin{ii},'HoughCircleGuess') %force the ring amplitude to zero for cyto only fit
+        doHoughCircleGuess= varargin{ii+1};
         ii=ii+2;
     elseif strcmp(varargin{ii},'InitialGuess')
         usePriorInitGuess=true;
@@ -130,7 +138,6 @@ fg(BW==0)=0;
 
 %[x0C, y0C] = imCentreofMass(fg);%this sucks for uneven rings
 %better use non intensity weighted avg
-[x0, y0] = imBinaryCentreofMass(fg);
 
 imSz = size(im);
 
@@ -150,7 +157,7 @@ cytoBg2max = inf;
 cytoBgWidth2min = cytoBgWidthMin;
 cytoBgWidth2max = inf;
 
-r0 = min(radGuess(fg),radMax);
+
 bg0=mean(im(otsuThresh==1));
 amplitude0 = max(im(:));
 cytoplasmBg0 = max(im(:));
@@ -168,6 +175,21 @@ if doFixedRadiusFit
         ub = [inf,inf, fitParAvg(3), fitParAvg(4),inf,inf,inf,fitParAvg(8),cytoBg2max, fitParAvg(10),ones(size(sectorAmp0))];
     end
 else
+    if ~doHoughCircleGuess
+        [x0, y0] = imBinaryCentreofMass(fg);
+        r0 = min(radGuess(fg),radMax);
+    else
+        %[centers radii]= imfindcircles(im,[6,12],'Sensitivity',1);
+        [centers radii]= imfindcircles(fg,[6,12],'Sensitivity',1);
+        if ~isempty(centers)
+            x0=centers(1,1);
+            y0=centers(1,2);
+            r0=radii(1);
+        else
+            [x0, y0] = imBinaryCentreofMass(fg);
+            r0 = min(radGuess(fg),radMax);
+        end
+    end
     initGuess = [x0,y0,r0,width0,amplitude0,bg0,cytoplasmBg0,cytoBgWidth,cytoBg2_0 ,cytoBgWidth2_0,sectorAmp0];
     wMin = width0-psfWidthExtraNm/2.35/pixSz_nm;
     wMax = width0+psfWidthExtraNm/2.35/pixSz_nm;
@@ -177,9 +199,15 @@ end
 
 if doSetRadius
     radiusManualPix = radiusManual/pixSz_nm;
-    initGuess(3) = radiusManualPix;
-    lb(3) = radiusManualPix;
-    ub(3) = radiusManualPix;
+    if numel(radiusManualPix)==1
+	    initGuess(3) = radiusManualPix;
+	    lb(3) = radiusManualPix;
+	    ub(3) = radiusManualPix;
+    else
+	    initGuess(3) = mean(radiusManualPix);
+	    lb(3) = radiusManualPix(1);
+	    ub(3) = radiusManualPix(2);
+    end
 end
 
 if doCytoOnlyFit
@@ -198,7 +226,9 @@ else
     opt = optimoptions(@lsqcurvefit,'Display','off');
 end
 
-[fitPar] = lsqcurvefit(@(x, xdata)  ringAndGaussBG(x, xdata,NSECTOR), ...
+%[fitPar] = lsqcurvefit(@(x, xdata)  ringAndGaussBG(x, xdata,NSECTOR), ...
+%                         initGuess ,imSz,im, lb,ub,opt); 
+[fitPar,resnorm,residual,exitflag,output] = lsqcurvefit(@(x, xdata)  ringAndGaussBG(x, xdata,NSECTOR), ...
                          initGuess ,imSz,im, lb,ub,opt); 
 
 fitIm = ringAndGaussBG(fitPar,imSz,NSECTOR);
@@ -256,7 +286,7 @@ if plotOn || (~isempty(DEBUG_RING) && DEBUG_RING==true)
     colormap gray;
     axis equal;
     title('bg sub');
-
+    keyboard
         
     if ~isempty(DEBUG_RING) && DEBUG_RING==true
         figure;

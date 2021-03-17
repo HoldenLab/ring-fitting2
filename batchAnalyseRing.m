@@ -23,6 +23,11 @@ function batchAnalyseRing(fileFilter,pixSz,varargin)
 %   'LineProfileWidth': LineWidth: perpendicular distance over which to integrate line profile signal to improve SNR. DEFAULT:pixSz , ie 1 pixel
 %   'NumKymoRepeats', nKymoWrap: Number of times to plot the kymograph side-by-side in the kymoWrap file. DEFAULT: 2
 %   'SaveRawKymograph', true/false: Save a non-background subtracted kymograph as well. DEFAULT, false
+%   'SaveFitPNG', true/ false: Save a png of the average image overlaid with the (first) fitted circle
+%   'SetManualRadius', manualRadiusNm: Sets the septum radius to fixed value manualRadiusNm
+%   'SetManualRadius', [manualRadiusNmMin,manualRadiusNmMax]: limits the septum radius to range defined by 2 element vector. Initial guess is average of the min and max Radius
+%   'FitMaxIP', true/false: Use maximum intensity projection instead of average for the fixed radius/ position fitting
+%   'HoughCircleGuess',true/false:Uses hough circle finding estimator for the initial guess. In general seems more robust than the simple binary estimator
 %
 % NOTE: If the background subtration fails for some frames - slow fitting, bright bands in the kymographs - this is usually because 'FixedRadiusFit' is set to true, but the radius is changing  - try changing 'FixedRadiusFit' to false. If the radius is changign the FixedRadiusFit gives bad results as the average radius is not a good match for all frames
 %
@@ -71,15 +76,17 @@ psfFWHM = 300;
 bleachPlotOn=false;
 nKymoWrap=2;
 doSaveRawKymograph = true;
+doSaveFitFigure=true;
 nargin = numel(varargin);
 ii = 1;
 while ii<=numel(varargin)
     if strcmp(varargin{ii},'PsfWidthRangeNm') || strcmp(varargin{ii},'CytoplasmBG-FWHM') ...
         || strcmp(varargin{ii},'CytoplasmBG-FWHM-min') || strcmp(varargin{ii},'CytoplasmBG-FWHM-max') ...
         || strcmp(varargin{ii},'RingRadius-max') || strcmp(varargin{ii},'ZeroPadKymograph')...
-        || strcmp(varargin{ii},'FixedRadiusFit') || strcmp(varargin{ii},'Radius') ...
+        || strcmp(varargin{ii},'FixedRadiusFit') || strcmp(varargin{ii},'SetManualRadius') ...
         || strcmp(varargin{ii},'CytoplasmOnlyFit')|| strcmp(varargin{ii},'PlotFit')...
-        || strcmp(varargin{ii},'ShowFitOutcome') || strcmp(varargin{ii},'FixedPositionFit')
+        || strcmp(varargin{ii},'ShowFitOutcome') || strcmp(varargin{ii},'FixedPositionFit') ...
+        || strcmp(varargin{ii},'FitMaxIP') || strcmp(varargin{ii},'HoughCircleGuess')
         ringFitArg={ringFitArg{:},varargin{ii:ii+1}};
         ii=ii+1;
     elseif strcmp(varargin{ii},'PsfFWHM')
@@ -93,6 +100,9 @@ while ii<=numel(varargin)
         ii=ii+2;
     elseif strcmp(varargin{ii},'SaveRawKymograph')
         doSaveRawKymograph=varargin{ii+1};
+        ii=ii+2;
+    elseif strcmp(varargin{ii},'SaveFitPNG')
+        doSaveFitFigure=varargin{ii+1};
         ii=ii+2;
     else
         ii=ii+1;
@@ -134,5 +144,12 @@ tiffwrite([savepath,filesep,name,'_kymoWrap.tif'],kymo_wrap);
 if doSaveRawKymograph
     tiffwrite([savepath,filesep,name,'_kymoRaw.tif'],kymoraw);
     tiffwrite([savepath,filesep,name,'_kymoRawWrap.tif'],kymoraw_wrap);
+end
+
+if doSaveFitFigure
+    h=figure;
+    plotCircleFig(mean(ringStack,3),circFit{1});
+    saveas(h,[savepath,filesep,name,'_fitResult.png']);
+    close(h);
 end
 
