@@ -1,5 +1,5 @@
 
-fname='180327_Sam1_1mW_RingHiLO_1_MMStack_Pos0.ome_denoise_reg_ring1.tif';
+fname='190214_GFP-cytoplasmic.tif';
 
 pixSz = 65; % [nm]
 lineWidthNm = pixSz;
@@ -12,7 +12,9 @@ psfFWHM = 300; % [nm]
 fname2 = [fname(1:end-4),'_rad300.tif'];
 copyfile(fname,fname2);
 batchAnalyseRing(fname2,pixSz,'SetManualRadius',300);
+delete(fname2);
 
 fname2 = [fname(1:end-4),'_rad400.tif'];
 copyfile(fname,fname2);
 batchAnalyseRing(fname2,pixSz,'SetManualRadius',400);
+delete(fname2);
