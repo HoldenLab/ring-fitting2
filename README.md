@@ -15,3 +15,5 @@ Add the 'ring-fitting2' directory to your MATLAB path, and save the updated path
 
 LICENSING INFORMATION
 All files are distributed under the GPLv3 and (c) 2020 Seamus Holden, Newcastle University unless otherwise stated. See LICENSE.txt for full terms.
+
+[![DOI](https://zenodo.org/badge/169422043.svg)](https://zenodo.org/badge/latestdoi/169422043)
