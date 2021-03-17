@@ -5,10 +5,13 @@ function verciniAnalysis(fileFilter,pixSz,varargin)
 % The fitted background contribution is subtracted from each image, and a kymograph calculated along the circular line profile 
 % of the cell circumference.
 % By default the background subtracted image and kymograph are saved. 
+% Automatically analyses all files matching "fileFilter" string
+%
 % NOTE: By default, TWO copies of the kymograph are plotted side by side, ie wrapping around the cell circumference twice, 
 % 0->720degrees. This is so that dynamics at the 360degree->0degree transition can still be identified
 % NOTE: If the background subtraction fails for some frames - slow fitting, bright bands in the kymographs - this is usually because 'FixedRadiusFit' is set to true, but the radius is changing, or because 'FixedPositionFit' is set to true but the cell position is changing (drift) - try changing 'FixedRadiusFit' or 'FixedPositionFit' to false.
 % NOTE: By default, a zero row is added as the last row of the kymograph so that ImageJ plotting defaults to the "correct" contrast for a background subtracted image, ie black = 0 counts. You can turn this off with 'ZeroPadKymograph', false
+%
 % INPUTS:
 %   fileFilter: Search string for files to analyse, eg '*.tif'
 %       Input image stacks should be cropped movies of septum/ circumferentially localized protein dynamics.
@@ -28,7 +31,7 @@ function verciniAnalysis(fileFilter,pixSz,varargin)
 %   'FixedRadiusFit', true/false (default:true): Fix the ring radius and shape parameters to the average ring parameters. Note the ring centroid can still shift to allow for small drifts. 
 %     Useful for cells that dont constrict within timeframe of imaging. If the cells constrict you need to turn this off. 
 %     FITPARAVG is the result of a prior fit to an averaged ring, used to fix the positions.
-%   'FixedPositionFit', true/false (default:false): Fix the ring position to the average ring position. This is set to fals by default to allow for small cell drifts during acquisition. However, for fitting sparse data, especially single molecule data, the ring position is not well constrained based only on a single image. In that case, it is important to set this option to true and use the average ring position, to avoid the ring position jumping large amounts frame to frame which is obviously bad.  This problem - ring fit jumping, may also occur to a lesser degree than for single molecule data for moderately sparse data, like nascent Z-rings. Again, if that is likely, set this option to true.
+%   'FixedPositionFit', true/false (default:false): Fix the ring position to the average ring position. This is set to fals by default to allow for small cell drifts during acquisition. However, for fitting sparse data, especially single molecule data, the ring position is not well constrained based only on a single image. In that case, it is important to set this option to true and use the average ring position, to avoid the ring position jumping large amounts frame to frame which is obviously bad.  This problem - fit jumping, may also occur to a lesser degree on moderately sparse non-single-molecule data, like nascent FtsZ-rings. If that is likely for your dataset, or you get weird results, try setting this option to true.
 %   'NumKymoRepeats', nKymoWrap (default:2): Number of times to plot the kymograph side-by-side in the kymoWrap file.
 %   'SaveRawKymograph', true/false (default:false): Save a non-background subtracted kymograph as well. 
 %   'SaveFitPNG', true/ false (default:true): Save a png of the average image overlaid with the (first) fitted circle
