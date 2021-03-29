@@ -110,10 +110,10 @@ while ii<=numel(varargin)
     elseif strcmp(varargin{ii},'CytoplasmOnlyFit') %force the ring amplitude to zero for cyto only fit
         doCytoOnlyFit= varargin{ii+1};
         ii=ii+2;
-    elseif strcmp(varargin{ii},'ShowFitOutcome') %force the ring amplitude to zero for cyto only fit
+    elseif strcmp(varargin{ii},'ShowFitOutcome') 
         doShowFitResult= varargin{ii+1};
         ii=ii+2;
-    elseif strcmp(varargin{ii},'HoughCircleGuess') %force the ring amplitude to zero for cyto only fit
+    elseif strcmp(varargin{ii},'HoughCircleGuess') 
         doHoughCircleGuess= varargin{ii+1};
         ii=ii+2;
     elseif strcmp(varargin{ii},'InitialGuess')

@@ -17,7 +17,7 @@ function [ ringStack_noBg, ringKymograph, circleData, kymoInfo, rawKymograph, fi
 %   'CytoplasmBG-FWHM-max', cytoBgFWHMmax_nm: Maximum for the FWHM of the large gaussian fitted to account for the defocussed cytoplasmic background. DEFAULT:1000
 % NOTE: A second defocussed Gaussian is also fitted, with min width cytoBgFWHMmin_nm, and max width=Inf because a single gaussian does not fit well the cytoplasmic BG distribution.
 %   'RingRadius-max', radMax_nm: Maximum fitted ring radius. Default should hold well for WT or even most mutant Bsubtilis but change if in a different organism. If you set it too large the fitting becomes unstable for small rings. DEFAULT: 600
-%   'ZeroPadKymograph', doZeroPadKymo: Add a zero row as the last row of the kymograph so that ImageJ plotting defaults to the correct contrast. DEFAULT: true
+%   'ZeroPadKymograph', doZeroPadKymo: Add a zero row as the last row of the kymograph so that ImageJ plotting defaults to the correct contrast. DEFAULT:false 
 %   'FixedRadiusFit', fitParAvg: Fix the ring radius and shape parameters to the average ring parameters. Note the ring centroid can still shift to allow for small drifts. Useful for cells that dont constrict within timeframe of imaging. If the cells constrict you need to turn this off. FITPARAVG is the result of a prior fit to an averaged ring, used to fix the positions. DEFAULT: true
 %   'FitMaxIP', true/false: Use maximum intensity projection instead of average for the fixed radius/ position fitting
 %   'HoughCircleGuess',true/false:Uses hough circle finding estimator for the initial guess. In general seems more robust than the simple binary estimator
@@ -26,7 +26,7 @@ function [ ringStack_noBg, ringKymograph, circleData, kymoInfo, rawKymograph, fi
 
 nargin = numel(varargin);
 fitRingArg={};
-doZeroPadKymo = true;
+doZeroPadKymo = false;
 doFixedRadiusFit = true;
 doMaxFit=false;
 ii = 1;

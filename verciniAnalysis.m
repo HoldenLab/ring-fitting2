@@ -36,7 +36,7 @@ function verciniAnalysis(fileFilter,pixSz,varargin)
 %   'NumKymoRepeats', nKymoWrap (default:2): Number of times to plot the kymograph side-by-side in the kymoWrap file.
 %   'SaveRawKymograph', true/false (default:false): Save a non-background subtracted kymograph as well. 
 %   'SaveFitPNG', true/ false (default:true): Save a png of the average image overlaid with the (first) fitted circle
-%   'ZeroPadKymograph', true/ false (default:true): Add a zero row as the last row of the kymograph so that ImageJ plotting defaults to the correct contrast. 
+%   'ZeroPadKymograph', true/ false (default:false): Add a zero row as the last row of the kymograph so that ImageJ plotting defaults to the correct contrast. 
 % OPTIONAL INPUTS (advanced):
 %   'CytoplasmBG-FWHM', cytoBgFWHM_nm: Initial guess for the FWHM of the large gaussian fitted to account for the defocussed cytoplasmic background. DEFAULT:1300
 %   'CytoplasmBG-FWHM-min', cytoBgFWHMmin_nm: Minimum for the FWHM of the large gaussian fitted to account for the defocussed cytoplasmic background. DEFAULT:800
