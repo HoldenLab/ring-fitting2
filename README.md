@@ -15,10 +15,9 @@ INSTALLATION
 
 Add the 'ring-fitting2' directory to your MATLAB path, and save the updated path  so that it will remain installed next time you start MATLAB.
 Required:
-Matlab (>=R2018b)
-Matlab toolboxes:
- - Image processing toolbox
- - Optimization toolbox
+- MATLAB (>=R2018b)
+- MATLAB Image processing toolbox
+- MATLAB Optimization toolbox
 
 USAGE INSTRUCTIONS
 
