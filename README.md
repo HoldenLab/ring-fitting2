@@ -17,8 +17,9 @@ Add the 'ring-fitting2' directory to your MATLAB path, and save the updated path
 Required:
 Matlab (>=R2018b)
 Matlab toolboxes:
- -Image processing toolbox
- <<OTHERS, still to list>>
+ - Image processing toolbox
+ - Optimization toolbox
+
 USAGE INSTRUCTIONS
 
 To run the software, please see detailed help documentation in the main analysis functions verciniAnalysis.m, manualVerciniAnalysis.m, which can be accessed by typing 'help verciniAnalysis' on the MATLAB command line.
@@ -35,8 +36,8 @@ CITATION
 If you use this software in work leading to a scientifc publication, please cite: 
 
 FtsZ treadmilling is essential for Z-ring condensation and septal constriction initiation in Bacillus subtilis cell division
-Kevin D. Whitley, Calum Jukes, Nicholas Tregidgo, Eleni Karinou, Pedro Almada, Ricardo Henriques, Cees Dekker, Séamus Holden
-bioRxiv 2020.07.01.182006; doi: https://doi.org/10.1101/2020.07.01.182006
+Kevin D. Whitley, Calum Jukes, Nicholas Tregidgo, Eleni Karinou, Pedro Almada, Yann Cesbron, Ricardo Henriques, Cees Dekker, Séamus Holden
+Nature Communications 12, 2448 (2021). https://doi.org/10.1038/s41467-021-22526-0
 
 [![DOI](https://zenodo.org/badge/169422043.svg)](https://zenodo.org/badge/latestdoi/169422043)
 
