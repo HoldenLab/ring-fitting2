@@ -1,7 +1,7 @@
 # ring-fitting2
 INFORMATION 
 
-Software for background subtraction and kymograph fitting for fluorescence microscopy image stacks of vertically immobilized bacteria using VerCINI (Vertical Cell Imaging by Nanostructured Immobilization). First published in Whitley et al, bioRxiv 2020. 
+Software for background subtraction and kymograph fitting for fluorescence microscopy image stacks of vertically immobilized bacteria using VerCINI (Vertical Cell Imaging by Nanostructured Immobilization). First published in Whitley et al, Nature Communications 2021. 
 This software is provided as is and without warranty.
 
 OVERVIEW
