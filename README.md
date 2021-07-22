@@ -11,13 +11,20 @@ Two analysis methods are provided:
 1) verciniAnalysis.m: Automated kymograph analysis where septa/ cell circumference is localized to sub-pixel precision by fitting an explicit model. The fitted background contribution is subtracted from each image, and a kymograph calculated along the circular line profile of the cell circumference. This should work for most datasets
 2) manualVerciniAnalysis.m: Manual analysis where the kymograph is calculated along a circular line profile manually selected for each image stack, based on the maximum intensity projection of the stack. This is mostly used for sparse single molecule datasets if automated VerCINI analysis has failed
 
-INSTALLATION
+SYSTEM REQUIREMENTS
 
-Add the 'ring-fitting2' directory to your MATLAB path, and save the updated path  so that it will remain installed next time you start MATLAB.
-Required:
+This package does not require any special hardware. It can be performed on a standard computer.
+
+This package development system has been tested on Windows 10, but should be compatible with other operating systems.
+
+The package requires the following software:
 - MATLAB (>=R2018b)
 - MATLAB Image processing toolbox
 - MATLAB Optimization toolbox
+
+INSTALLATION
+
+Add the 'ring-fitting2' directory to your MATLAB path, and save the updated path so that it will remain installed next time you start MATLAB. Typical install time should be a couple of minutes.
 
 USAGE INSTRUCTIONS
 
