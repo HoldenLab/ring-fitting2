@@ -28,10 +28,16 @@ Add the 'ring-fitting2' directory to your MATLAB path, and save the updated path
 
 USAGE INSTRUCTIONS
 
-To run the software, please see detailed help documentation in the main analysis functions verciniAnalysis.m, manualVerciniAnalysis.m, which can be accessed by typing 'help verciniAnalysis' on the MATLAB command line.
+To run the software, please see detailed help documentation in the main analysis functions verciniAnalysis.m, manualVerciniAnalysis.m, which can be accessed by typing 'help verciniAnalysis' on the MATLAB command line. Each function should take between 10 s and 10 min to run on a 'standard' computer, depending on the size of the dataset.
 
-Test data and example analyses are included in ring-fitting2/testing
+DEMO
 
+Test data and example analyses are included in ring-fitting2/testing. Three scripts are provided:
+- testCytoplasmicGFP_Analysis.m
+- testVerciniAnalysis.m
+- testManualVerciniAnalysis.m
+
+Each script can be run either from the command line (i.e. by typing the function name and pressing Enter) or by running them from the Editor. They will automatically analyse example data provided in the ring-fitting2/testing, and produce a new directory ring-fitting2/testing/analysed with the output data. Each should take between 10 s and 1 min to run on a 'standard' computer. Note that for testManualVerciniAnalysis you must manually draw a circle where you see a ring in the image, then press Enter.
 
 LICENSING INFORMATION
 
