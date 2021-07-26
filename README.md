@@ -39,6 +39,16 @@ Test data and example analyses are included in ring-fitting2/testing. Three scri
 
 Each script can be run either from the command line (i.e. by typing the function name and pressing Enter) or by running them from the Editor. They will automatically analyse example data provided in the ring-fitting2/testing, and produce a new directory ring-fitting2/testing/analysed with the output data. Each should take between 10 s and 1 min to run on a 'standard' computer. Note that for testManualVerciniAnalysis you must manually draw a circle where you see a ring in the image, then press Enter.
 
+The output files will be
+- file_bgsub.tif (video with cytoplasmic background subtracted)
+- file_diamInfo.txt (text file showing fitted diameter of ring for frame 1)
+- file_fitData.mat (MATLAB file containing information about the fitting)
+- file_fitResult.png (image showing first frame of video with fit to model)
+- file_kymo.tif (radial kymograph from 0 to 360 degrees)
+- file_kymoRaw.tif (radial kymograph without background subtraction from 0 to 360 degrees)
+- file_kymoRawWrap.tif (radial kymograph without background subtraction from 0 to 720 degrees)
+- file_kymoWrap.tif (radial kymograph from 0 to 720 degrees)
+
 LICENSING INFORMATION
 
 All files are distributed under the GPLv3 and (c) 2020 Seamus Holden, Newcastle University unless otherwise stated. See LICENSE.txt for full terms.
